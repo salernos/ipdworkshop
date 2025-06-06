@@ -1,28 +1,49 @@
-Package: BuildABiocWorkshop
-Title: Bioconductor or R Workshop Template and Github Actions
-Version: 2.0.1
+Package: ipdworkshop
+Title: Inference with Predicted Data Using the ipd Package
+Version: 1.0.0
 Authors@R: 
-    person(given = "Sean",
-           family = "Davis",
-           role = c("aut", "cre"),
-           email = "seandavi@gmail.com",
-           comment = c(ORCID = "0000-0002-8991-6458"))
-Description: This package serves as a template for using github actions to 
-    prepare a Bioconductor Workshop package for use. In particular,
-    a pkgdown website and docker image are generated based on workflow 
-    settings. 
+    person(
+      given  = "Stephen",
+      family = "Salerno",
+      role   = c("aut", "cre"),
+      email  = "ssalerno@fredhutch.org",
+      comment = c(ORCID = "0000-0003-2763-0494")
+    ),
+    person(
+      given  = "Sean",
+      family = "Davis",
+      role   = "ctb",
+      email  = "seandavi@gmail.com",
+      comment = c(ORCID = "0000-0002-8991-6458")
+    )
+Description: |
+    A workshop demonstrating how to perform downstream statistical inference 
+    when the outcome has been partially imputed via a machine learning model.  
+    The central R/Bioconductor package is ipd (Inference with Predicted Data).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
-Depends: 
+Depends:
+    R (>= 4.0),
+    ipd,
+    BiocStyle,
     Biobase
-Suggests: 
+Imports:
     knitr,
     rmarkdown,
-    pkgdown
-URL: https://seandavi.github.io/BuildABiocWorkshop/
-BugReports: https://github.com/seandavi/BuildABiocWorkshop/issues/new/choose
+    tidyverse,
+    patchwork,
+    NHANES,
+    ranger,
+    mgcv,
+    pROC,
+    ALL,
+    BiocGenerics
+Suggests:
+    DT
+URL: https://salernos.github.io/ipdworkshop/
+BugReports: https://github.com/salernos/ipdworkshop/issues/new/choose
 VignetteBuilder: knitr
-DockerImage: ghcr.io/seandavi/buildabiocworkshop:latest
+DockerImage: ghcr.io/salernos/ipdworkshop:latest
