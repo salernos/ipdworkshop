@@ -2,7 +2,7 @@ Package: ipdworkshop
 Title: Inference with Predicted Data Using the ipd Package
 Version: 1.0.0
 Authors@R: 
-    person(
+    c(person(
       given  = "Stephen",
       family = "Salerno",
       role   = c("aut", "cre"),
@@ -15,7 +15,7 @@ Authors@R:
       role   = "ctb",
       email  = "seandavi@gmail.com",
       comment = c(ORCID = "0000-0002-8991-6458")
-    )
+    ))
 Description: |
     A workshop demonstrating how to perform downstream statistical inference 
     when the outcome has been partially imputed via a machine learning model.  
