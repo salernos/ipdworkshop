@@ -1,0 +1,802 @@
+---
+title: "Unit 02: Different Measures of Adiposity"
+author: "Stephen Salerno"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    code_folding: hide
+vignette: >
+  %\VignetteIndexEntry{Unit 02: Different Measures of Adiposity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  comment = "#>"
+)
+```
+
+## Background and Motivation
+
+### How Do We Measures Adiposity?
+
+Body mass index (BMI) is the most commonly used anthropometric proxy for 
+adiposity in epidemiologic studies and clinical settings. It is simple to 
+calculate, weight in kilograms divided by height in meters squared, and has 
+well-established cut-points for classifying patients as overweight or obese. 
+However, BMI does not distinguish between fat mass and lean mass, nor does it 
+capture fat distribution (visceral versus subcutaneous). As a result, BMI can 
+both under- and over-estimate true adiposity in key subgroups. For example 
+muscular individuals (e.g., athletes) may be misclassified as "obese," while 
+older adults with sarcopenia (low muscle mass) may fall below BMI thresholds 
+despite having high percent body fat. 
+
+<br>
+
+![*Source: https://www.medrxiv.org/content/10.1101/2025.04.01.25325037v1.full.pdf*](images/bmi_flowchart.png){width=100%}
+
+<br>
+
+Waist circumference (WC) is another simple measure of central adiposity that 
+may better reflect visceral fat, a key driver of metabolic risk. Standard WC 
+cut-points (e.g., ≥ 102 cm in men, ≥ 88 cm in women) identify individuals at 
+increased cardiometabolic risk, even when their BMI is in the normal or 
+overweight range. Yet WC also does not directly quantify total body fat and 
+may be influenced by body build, posture, and measurement error.
+
+Dual-energy X-ray absorptiometry (DXA) provides a more accurate "gold-standard" 
+measure of body composition by directly quantifying total and regional fat and 
+lean mass. DXA-derived percent fat thresholds (e.g., > 30% in men, > 42% in 
+women) have been validated against metabolic outcomes. Comparing BMI-based 
+obesity (BMI ≥ 30 kg/m²) and WC-based obesity (WC ≥ 102 cm men, ≥ 88 cm women) 
+with DXA-defined obesity reveals where and how often these common 
+anthropometric proxies misclassify true adiposity.
+
+In this module, we will use publicly available data from the National Health 
+and Nutrition Examination Survey 
+([NHANES](https://www.cdc.gov/nchs/nhanes/index.html)) to:
+
+1. **Load** BMI, WC, and DXA-based measures of adiposity and their associated 
+features
+2. **Define** obesity by three standards:
+    - BMI (≥ 30 kg/m²)
+    - Waist circumference (men ≥ 102 cm; women ≥ 88 cm)
+    - DXA % body fat (> 30% men; > 42% women)
+3.  **Visualize** misclassification rates overall and by age, sex, and 
+race/ethnicity
+4.  **Calibrate** both BMI and WC-based obesity measures to DXA using the 
+`ipd` package
+5.  **Discuss** implications for research and practice
+
+By the end, we may have a better understanding of the strengths and limitations 
+of BMI and WC as proxies for adiposity, know how to assess 
+their sensitivity and specificity versus DXA, and be equipped to correct for 
+measurement error using IPD when only BMI/WC are available.
+
+### NHANES
+
+The National Health and Nutrition Examination Survey 
+([NHANES](https://www.cdc.gov/nchs/nhanes/index.html)) is a nationally 
+representative program conducted by the U.S. Centers for Disease Control 
+and Prevention that combines in-home interviews with standardized physical 
+examinations and laboratory tests to assess the health and nutritional 
+status of Americans. Initiated in the early 1960s and carried out continuously 
+since 1999 in two-year cycles, NHANES informs public health policy, tracks 
+trends in chronic conditions and risk factors, and support research on diet, 
+disease, and health disparities. NHANES provides:
+
+- **DXA-measured percent body fat** (`DXDTOPF`) for a subset of participants
+- **BMI** (`BMBMI`), derived from measured height and weight
+- **Waist circumference** (`BMXWAIST`), a potential measure of central fat
+
+As DXA scans are costly and time-consuming, many studies only record BMI and 
+WC. When our scientific question involves true adiposity (e.g., its association 
+with certain risk factors), but we only have BMI and WC in most participants, 
+we can use `ipd` to correct our downstream inference on % body fat to account 
+for the fact that these proxies are being used in place of the true DXA 
+measurement.
+
+**Note:** DXA scans were collected through the **2017 - 2018** NHANES cycle 
+but were suspended during the COVID-19 pandemic. As a result, subsequent 
+waves, including the **August 2021 - August 2023** data, do **not** include 
+DXA measurements. In this tutorial, we will therefore:
+
+1. Treat the **2017–2018** wave as "labeled" data (which includes `DXDTOPF`).  
+2. Use **IPD** to correct our inference when estimating associations between 
+% body fat and other covariates in the absence of direct DXA measurements in 
+the  **August 2021 - August 2023** wave. 
+
+This approach lets us leverage historic DXA data to predict adiposity in more 
+recent participants, enabling unbiased inference across pre- and post-pandemic 
+cohorts.
+
+## Data Preparation and Exploration
+
+We will now load a pre-compiled NHANES dataset, explore key variables (BMI, 
+waist circumference, DXA % body fat) by cohort, and define obesity categories 
+for later misclassification analyses and IPD.
+
+### Loading the Pre-Compiled NHANES Data
+
+For convenience, we prepared and saved a data file, `data/NHANES.rda`, which
+contains a tibble, **NHANES**, with the following columns:
+
+- `SEQN`      - Respondent ID  
+- `Cohort`    - Factor: "2017-2018" or "2021-2023"  
+- `Age`       - Factor: "Under 20", "20-39", "40-59", or "60+" 
+- `Sex`       - Factor: "Male" or "Female"  
+- `Race`      - Factor: "Non-Hispanic White", "Hispanic", "Non-Hispanic Black", "Non-Hispanic Asian", or "Other Race - Including Multi-Racial" 
+- `Smoking`   - Factor: "Never Smoker", "Former Smoker", or "Current Smoker"
+- `Education` - Factor: "Less than high school", "High school graduate/GED or equivalent", "Some college or AA degree", "College graduate or above", or "Refused/Unknown" 
+- `BMXBMI`    - Body Mass Index (kg/m²)  
+- `BMXWAIST`  - Waist Circumference (cm)  
+- `DXDTOPF`   - DXA Percent Body Fat (only measured in 2017–2018; `NA` in 2021–2023)
+- `WTMEC4YR`  - Four-Year Adjusted Survey Weights
+
+**Note:** The the code used to produce these data is available in this 
+repository at `inst/NHANES_DATA.R`.
+
+### Install and Load the Necessary Packages
+
+```{r}
+# Install these packages if you have not already:
+# install.packages(c("ipd", "here", "janitor", "broom", "scales", "tidyverse"))
+
+library(ipd)        # Inference with predicted data
+library(here)       # Build file paths relative to project root
+library(janitor)    # Data cleaning and tabulation helpers 
+library(broom)      # Convert model objects (lm, glm, ipd) into tidy data.frames
+library(scales)     # Formatting scales and labels for ggplot2
+library(tidyverse)  # Meta‐package for data manipulation and visualization
+```
+
+### Load the Data
+
+```{r}
+# Load the dataset
+load(here("vignettes", "data", "NHANES.RData"))
+
+# Inspect its structure
+glimpse(NHANES)
+```
+
+### Overview by Cohort
+
+#### Sample Sizes
+
+```{r}
+NHANES |>
+  count(Cohort) |>
+  mutate(pct = n / sum(n) * 100)
+```
+
+#### DXA Missingness
+
+```{r}
+NHANES |>
+  group_by(Cohort) |>
+  summarize(
+    total       = n(),
+    pct_missing = mean(is.na(DXDTOPF)) * 100
+  )
+```
+
+> **Expected:**
+>
+> * 2017–2018: 100% of DXA (`DXDTOPF`) present (using those with mobile examination center (MEC) tests and MEC weights).
+> * 2021–2023: 100% missing for `DXDTOPF` (no DXA data post-pandemic).
+
+### Descriptive Statistics
+
+#### BMI, Waist Circumference, and DXA % Fat
+
+```{r}
+NHANES |>
+  group_by(Cohort) |>
+  summarize(
+    BMI_mean = mean(BMXBMI),
+    BMI_sd   = sd(BMXBMI),
+    WC_mean  = mean(BMXWAIST),
+    WC_sd    = sd(BMXWAIST),
+    DXA_mean = mean(DXDTOPF),
+    DXA_sd   = sd(DXDTOPF)
+  ) |>
+  pivot_longer(-Cohort)|>
+  separate(name, c("Metric", "Statistic")) |>
+  pivot_wider(names_from = Statistic, values_from = value)
+```
+
+#### Distributions
+
+```{r}
+ggplot(NHANES, aes(x = BMXBMI, fill = Cohort)) +
+  geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
+  labs(title = "BMI Distribution by Cohort", x = "BMI (kg/m²)", y = "Count") +
+  theme_minimal()
+
+ggplot(NHANES, aes(x = BMXWAIST, fill = Cohort)) +
+  geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
+  labs(title = "Waist Circumference by Cohort", x = "WC (cm)", y = "Count") +
+  theme_minimal()
+
+ggplot(NHANES, aes(x = DXDTOPF, fill = Cohort)) +
+  geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
+  labs(title = "DXA Total % Fat by Cohort", x = "% Fat", y = "Count") +
+  theme_minimal()
+```
+
+#### DXA vs Anthropometry in 2017–2018
+
+Only the 2017–2018 cohort has `DXDTOPF`, so we examine how BMI and WC relate to true % body fat among the study participants in this wave:
+
+```{r}
+NHANES |>
+  filter(Cohort == "2017-2018") |>
+  ggplot(aes(x = BMXBMI, y = DXDTOPF)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(
+    title = "DXA % Body Fat vs BMI (2017–2018)",
+    x = "BMI (kg/m²)", y = "DXDTOPF (%)"
+  ) +
+  theme_minimal()
+
+NHANES |>
+  filter(Cohort == "2017-2018") |>
+  ggplot(aes(x = BMXWAIST, y = DXDTOPF)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", color = "darkgreen") +
+  labs(
+    title = "DXA % Body Fat vs Waist Circumference (2017–2018)",
+    x = "WC (cm)", y = "DXDTOPF (%)"
+  ) +
+  theme_minimal()
+```
+
+Let us also directly compare the standardized values of these continous outcomes:
+
+```{r}
+NHANES_std <- NHANES |>
+  filter(Cohort == "2017-2018") |>
+  mutate(
+    BMXBMI_std   = scale(BMXBMI),
+    BMXWAIST_std = scale(BMXWAIST),
+    DXDTOPF_std  = scale(DXDTOPF)
+  ) |>
+  pivot_longer(BMXBMI_std:DXDTOPF_std) |>
+  mutate(name = factor(name, 
+    levels = c("BMXBMI_std", "BMXWAIST_std", "DXDTOPF_std"),
+    labels = c("BMI", "WC", "DXA"))) 
+
+ggplot(NHANES_std, aes(x = value, group = name, linetype = name)) +
+  geom_density() +
+  labs(
+    title = "Standardized Measures of Adiposity (2017–2018)",
+    linetype = "Measure", x = "Z Score", y = "Density"
+  ) +
+  theme_minimal()
+
+ggplot(NHANES_std, aes(x = value, group = name, linetype = name)) +
+  facet_wrap(~Age) +
+  geom_density() +
+  labs(
+    title = "Standardized Measures of Adiposity (2017–2018)",
+    linetype = "Measure", x = "Z Score", y = "Density"
+  ) +
+  theme_minimal()
+
+ggplot(NHANES_std, aes(x = value, group = name, linetype = name)) +
+  facet_wrap(~Sex) +
+  geom_density() +
+  labs(
+    title = "Standardized Measures of Adiposity (2017–2018)",
+    linetype = "Measure", x = "Z Score", y = "Density"
+  ) +
+  theme_minimal()
+
+ggplot(NHANES_std, aes(x = value, group = name, linetype = name)) +
+  facet_wrap(~Race) +
+  geom_density() +
+  labs(
+    title = "Standardized Measures of Adiposity (2017–2018)",
+    linetype = "Measure", x = "Z Score", y = "Density"
+  ) +
+  theme_minimal()
+```
+
+### Defining Obesity Categories
+
+We create three binary indicators:
+
+* **`obese_BMI`**: BMI ≥ 30 kg/m²
+* **`obese_WC`**: WC ≥ 102 cm (men) or ≥ 88 cm (women)
+* **`obese_DXA`**: DXA % Fat > 30% (men) or > 42% (women)
+
+```{r}
+NHANES <- NHANES |>
+  mutate(
+    obese_BMI = BMXBMI >= 30,
+    obese_WC  = case_when(
+      Sex == "Male"   & BMXWAIST >= 102 ~ TRUE,
+      Sex == "Female" & BMXWAIST >=  88 ~ TRUE,
+      .default                          = FALSE
+    ),
+    obese_DXA = case_when(
+      Sex == "Male"   & DXDTOPF > 30 ~ TRUE,
+      Sex == "Female" & DXDTOPF > 42 ~ TRUE,
+      .default                       = FALSE
+    )
+  )
+```
+
+#### Misclassification in 2017–2018
+
+Compare BMI-defined vs DXA-defined obesity:
+
+```{r}
+NHANES |>
+  filter(Cohort == "2017-2018") |>
+  tabyl(obese_DXA, obese_BMI) |>
+  adorn_totals("row") |>
+  adorn_percentages("row") |>
+  adorn_pct_formatting()
+```
+
+And WC-defined vs DXA-defined:
+
+```{r}
+NHANES |>
+  filter(Cohort == "2017-2018") |>
+  tabyl(obese_DXA, obese_WC) |>
+  adorn_totals("row") |>
+  adorn_percentages("row") |>
+  adorn_pct_formatting()
+```
+
+> These tables show sensitivity/specificity of BMI and WC relative to DXA.
+
+#### Overall Distributions
+
+We start by comparing the density distributions of BMI and DXA percent-fat in the sample, and then tabulate the overall overlap and misclassification.
+
+```{r}
+ggplot(NHANES) +
+  geom_density(aes(scale(BMXBMI)), size = 1) +
+  geom_density(aes(scale(BMXWAIST)), linetype = 2, size = 1) +
+  geom_density(aes(scale(DXDTOPF)), linetype = 3, size = 1) +
+  labs(
+    x = "BMI (kg/m²) / DXA % Fat",
+    y = "Density",
+    title = "Overall Distributions: BMI (solid) vs. WC (dashed) vs. DXA %-Fat (dotted)"
+  )
+```
+
+
+#### Stratified Comparisons: Grouped Bar Charts by Measure
+
+First, reshape the data to long format so that BMI, WC, and DXA-defined obesity are all in one "Measure" column:
+
+```{r}
+# Assume NHANES is already loaded and has Age, Sex, Race, 
+# and the three obesity variables
+
+nhanes_long <- NHANES |>
+  select(Age, Sex, Race, obese_BMI, obese_WC, obese_DXA) |>
+  pivot_longer(
+    cols      = starts_with("obese_"),
+    names_to  = "Measure",
+    values_to = "Obese"
+  ) |>
+  mutate(
+    Measure = recode(Measure,
+      obese_BMI = "BMI",
+      obese_WC  = "Waist Circumference",
+      obese_DXA = "DXA"
+    )
+  )
+```
+
+##### By Age Group
+
+```{r}
+prop_age <- nhanes_long |>
+  group_by(Age, Measure) |>
+  summarize(prop = mean(Obese, na.rm = TRUE), .groups = "drop")
+
+ggplot(prop_age, aes(x = Age, y = prop, fill = Measure)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    x     = "Age Group",
+    y     = "Proportion Obese",
+    fill  = "Measure",
+    title = "Obesity Prevalence by Age Group: BMI vs. WC vs. DXA"
+  ) +
+  theme_minimal()
+```
+
+##### By Sex
+
+```{r}
+prop_sex <- nhanes_long |>
+  group_by(Sex, Measure) |>
+  summarize(prop = mean(Obese, na.rm = TRUE), .groups = "drop")
+
+ggplot(prop_sex, aes(x = Sex, y = prop, fill = Measure)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    x     = "Sex",
+    y     = "Proportion Obese",
+    fill  = "Measure",
+    title = "Obesity Prevalence by Sex: BMI vs. WC vs. DXA"
+  ) +
+  theme_minimal()
+```
+
+##### By Race/Ethnicity
+
+```{r}
+prop_race <- nhanes_long |>
+  group_by(Race, Measure) |>
+  summarize(prop = mean(Obese, na.rm = TRUE), .groups = "drop")
+
+ggplot(prop_race, aes(x = Race, y = prop, fill = Measure)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(
+    x     = "Race / Ethnicity",
+    y     = "Proportion Obese",
+    fill  = "Measure",
+    title = "Obesity Prevalence by Race/Ethnicity: BMI vs. WC vs. DXA"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### Discussion
+
+BMI misclassification varies systematically across subgroups:
+
+-   **Age**: Young adults (18–34) often have lower lean mass, so normal-BMI individuals can still have high body fat ("normal-weight obesity").
+-   **Sex**: Women generally have higher percent-fat at the same BMI; sex-specific DXA thresholds help adjust for this.
+-   **Race/Ethnicity**: Differences in body composition and fat distribution mean that a single BMI cut-point may not correspond to the same adiposity level across groups.
+
+**Implications**: Reliance on BMI alone can bias epidemiologic associations with true adiposity-driven outcomes (e.g., diabetes, cardiovascular disease). When DXA or other body-composition measures are impractical, consider calibration equations or subgroup-specific BMI thresholds.
+
+**Next:** we will split the combined NHANES data into **labeled** (2017–2018 with `DXDTOPF`) and **unlabeled** (2021–2023 without DXA), and then proceed with IPD using BMI or WC as our proxy.
+
+### Demographic Associations: Naive vs Classical vs IPD
+
+#### Naive vs Classical vs IPD Inference
+
+We are interested in studying the *association* between *true percent body fat* 
+(DXA % fat) and risk factors such as age, sex, and race. We model the *binary*
+obesity outcome (DXA-defined "true" vs BMI/WC "proxy") as a function of *Age*, 
+*Sex*, and *Race* using logistic regression:
+
+- **Naive:** proxy-only model on **unlabeled** (2021–2023)  
+- **Classical:** true-only model on **labeled** (2017–2018)  
+- **IPD:** combine both while correcting for proxy error
+
+
+
+
+
+$$
+\text{Obseity}_\text{DXA} \;=\; \beta_0 \;+\;\beta_{\text{Age}}\,(\text{Age})\;+\;\beta_{\text{Gender}}\,\mathbf{1}_{\text{male}} \;+\;\beta_{\text{Race}}\,\mathbf{1}_{\text{Black}} \;+\;\cdots + \varepsilon.
+$$
+
+We now compare three approaches for estimating the association of **percent body fat** with **Age**, **Sex**, and **Race/Ethnicity**:
+
+- **Naive:** regress the proxy (BMI or WC) on demographics in the **unlabeled** (2021–2023) cohort only.  
+- **Classical:** regress the true DXA % fat on demographics in the **labeled** (2017–2018) cohort only.  
+- **IPD:** combine both cohorts, treating `DXDTOPF` as the true outcome in 2017–2018 and the proxy (BMI or WC) in 2021–2023, and run `ipd::ipd()` to correct bias and variance.
+
+#### Setup Labeled vs Unlabeled Data
+
+```{r}
+# Split NHANES into labeled (DXA available) vs unlabeled
+labeled   <- NHANES |> filter(Cohort == "2017-2018")
+unlabeled <- NHANES |> filter(Cohort == "2021-2023")
+
+# Stack for IPD
+combined <- bind_rows(
+  labeled   |> mutate(set_label = "labeled"),
+  unlabeled |> mutate(set_label = "unlabeled")
+)
+```
+
+#### Naive & Classical Regressions
+
+We fit:
+
+* **Naive-BMI:**   `lm(BMI ~ Age + Sex + Race,   data = unlabeled)`
+* **Naive-WC:**    `lm(WC  ~ Age + Sex + Race,   data = unlabeled)`
+* **Classical:**   `lm(DXDTOPF ~ Age + Sex + Race, data = labeled)`
+
+For the naive method, we treat BMI- and WC-based obesity (our 'predictions) as 
+the true outcomes, fit on the **unlabeled** participants:
+
+```{r naive-classical}
+# Naïve on unlabeled
+naive_bmi_glm <- glm(obese_BMI ~ Age + Sex + Race, 
+                     
+  family = binomial, data = unlabeled)
+
+naive_wc_glm  <- glm(obese_WC  ~ Age + Sex + Race,
+                     
+  family = binomial, data = unlabeled)
+```
+
+> **Interpretation:**
+>
+> -   Because we 'predicted' obesity using BMI or WC, the "naive" coefficient are ...
+
+For the classical approach, we fit the true model on the **labeled** subset (with actual DXA % fat). That is:
+
+```{r, eval = F}
+# Classical on labeled
+classical_glm <- glm(obese_DXA ~ Age + Sex + Race,
+                     family = binomial, data = labeled)
+
+# Combine
+demo_naive_classical <- bind_rows(naive_bmi_df, naive_wc_df, classical_df)
+demo_naive_classical
+```
+
+> **Interpretation:**
+>
+> -   This uses only **labeled** participants; estimates are unbiased (since it uses true `Y`) but have larger SE than IPD might achieve.
+
+#### IPD Corrections
+
+We now apply **IPD** to leverage all participants (labeled + unlabeled) while adjusting for prediction error. We run two IPD analyses, one using `BMI` as our `pred_col` and one using `WC`:
+
+```{r, eval = F}
+ipd_res_bmi <- ipd(
+    formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
+    method  = "pspa",
+    model   = "logistic",
+    data    = combined,
+    label   = "set_label"
+)
+
+ipd_res_wc <- ipd(
+    formula = obese_DXA - obese_WC ~ Age + Sex + Race,
+    method  = "pspa",
+    model   = "logistic",
+    data    = labeled,
+    unlabeled_data = unlabeled
+)
+
+demo_ipd <- bind_rows(summary(ipd_res_bmi), summary(ipd_res_wc))
+demo_ipd
+```
+
+#### Combined Results & Visualization
+
+```{r demo-results-plot, fig.width=8, fig.height=6, eval=FALSE}
+all_demo <- bind_rows(
+  demo_naive_classical,
+  demo_ipd
+) |>
+  mutate(
+    Approach = factor(Approach,
+      levels = c("Naive","Classical","postpi_analytic","ppi","ppi_plus","pspa","chen")
+    )
+  )
+
+# Example: plot Age coefficient across methods for BMI vs WC
+all_demo |>
+  filter(Term == "Age") |>
+  ggplot(aes(x = Estimate, y = Approach, color = Proxy)) +
+  geom_point(size = 2) +
+  geom_errorbarh(aes(xmin = Estimate - 1.96*Std.Error,
+                      xmax = Estimate + 1.96*Std.Error),
+                 height = 0.2) +
+  labs(
+    title = "Age Coefficient: Naive vs Classical vs IPD",
+    subtitle = "Proxy = BMI or WC",
+    x = "Estimate (±1.96·SE)",
+    y = ""
+  ) +
+  theme_minimal()
+```
+
+> **Interpretation:**
+>
+> * **Naive** (BMI or WC) regresses the proxy outcome on demographics in the **unlabeled** cohort-often biasing coefficients toward zero due to proxy measurement error.
+> * **Classical** regresses the true DXA % fat on demographics in the **labeled** cohort-unbiased but less efficient (fewer observations).
+> * **IPD** methods combine both cohorts, using the labeled DXA values and the proxy in the unlabeled cohort to correct bias and recover valid estimates for the effect of Age, Sex, and Race/Ethnicity on true adiposity.
+
+
+
+--------------------------------------------------------------------------------
+
+
+### 6.3 IPD: Two Calling Styles
+
+#### 6.3.1 Style 1: Single `combined` Data & `set_label`
+
+```r
+ipd_bmi_1 <- ipd(
+  formula   = obese_DXA ~ Age + Sex + Race,
+  data      = combined,
+  true_col  = "obese_DXA",
+  pred_col  = "obese_BMI",
+  label_col = "set_label",
+  model     = "logistic",
+  method    = "pspa",
+  nboot     = 200
+)
+```
+
+This works because `combined$Age` retains all four levels.
+
+#### 6.3.2 Style 2: Separate `labeled_data` / `unlabeled_data`
+
+If we call IPD with separate data frames:
+
+```r
+ipd_bmi_2 <- ipd(
+  formula        = obese_DXA ~ Age + Sex + Race,
+  model          = "logistic",
+  method         = "pspa",
+  labeled_data   = labeled,
+  unlabeled_data = unlabeled,
+  true_col       = "obese_DXA",
+  pred_col       = "obese_BMI",
+  nboot          = 200
+)
+```
+
+we get an informative error:
+
+> **Error:**
+>
+> ```
+> Factor Age has new level(s): 60+
+> ```
+
+Because `unlabeled$Age` does *not* include any `"60+"` observations, but IPD expects the same factor levels in both sets.
+
+### 6.4 Fixing the Factor Levels
+
+To fix, explicitly give the unlabeled data the same levels as the labeled:
+
+```r
+unlabeled2 <- unlabeled %>%
+  mutate(
+    Age = factor(Age, levels = levels(labeled$Age))
+  )
+
+ipd_bmi_3 <- ipd(
+  formula        = obese_DXA ~ Age + Sex + Race,
+  model          = "logistic",
+  method         = "pspa",
+  labeled_data   = labeled,
+  unlabeled_data = unlabeled2,
+  true_col       = "obese_DXA",
+  pred_col       = "obese_BMI",
+  nboot          = 200
+)
+```
+
+Now **IPD** runs without error, preserving the `"60+"` level.
+
+### 6.5 Extracting Coefficients
+
+We extract the Age coefficients from naïve, classical, and IPD for comparison:
+
+```r
+# Helper for IPD extracts
+extract_ipd <- function(ipd_res, proxy) {
+  map_dfr(ipd_res, ~ tibble(
+    Approach  = .x$method_name,
+    Proxy     = proxy,
+    Term      = names(.x$estimate),
+    Estimate  = unname(.x$estimate),
+    Std.Error = unname(.x$se_estimate)
+  ))
+}
+
+demo_naive_classical <- bind_rows(
+  tidy(naive_bmi_glm)   %>% mutate(Approach="Naïve",    Proxy="BMI"),
+  tidy(naive_wc_glm)    %>% mutate(Approach="Naïve",    Proxy="WC"),
+  tidy(classical_glm)   %>% mutate(Approach="Classical",Proxy="DXA")
+)
+
+demo_ipd <- extract_ipd(ipd_bmi_3, "BMI") %>%
+  bind_rows(extract_ipd(ipd_wc_3, "WC"))
+
+all_demo <- bind_rows(demo_naive_classical, demo_ipd) %>%
+  filter(Term == "Age60+")  # compare the 60+ coefficient
+```
+
+### 6.6 Visualization
+
+```r
+all_demo %>%
+  ggplot(aes(x = Estimate, y = Approach, color = Proxy)) +
+  geom_point(size = 2) +
+  geom_errorbarh(aes(xmin = Estimate - 1.96*Std.Error,
+                      xmax = Estimate + 1.96*Std.Error),
+                 height = 0.2) +
+  labs(
+    title    = "Logistic Coefficient for Age '60+'",
+    subtitle = "Naïve vs Classical vs IPD (BMI vs WC proxies)",
+    x        = "Log Odds Estimate (±1.96·SE)",
+    y        = ""
+  ) +
+  theme_minimal()
+```
+
+> **Key Teaching Points:**
+>
+> 1. **Naïve & Classical** run cleanly on single‐cohort data.
+> 2. **IPD (Style 2)** errors when the unlabeled set lacks a factor level (`"60+"`), but Style 1 (combined) avoids it.
+> 3. The fix is to explicitly align factor levels across labeled/unlabeled before IPD.
+> 4. Both IPD calling styles produce equivalent corrected estimates once the data are harmonized.
+
+```
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+### Summary & Key Takeaways
+
+- **BMI** is an imperfect proxy for DXA % body fat. Naive regression on BMI-predicted % fat grossly misestimates the effect of Age.
+- **Classical** regression on true DXA % fat is unbiased but data-intensive (expensive scans).
+- **IPD** allows you to leverage a *large cohort with only BMI + covariates*, correct for prediction error, and recover nearly unbiased estimates for Age’s effect on true % body fat-often with narrower intervals than classical alone.
+- **Choice of prediction model** (linear, GAM, RF) impacts downstream IPD performance. A better predictor typically yields more accurate inference.
+
+
+# End of Tutorial 3
+
+
+
+## Exercises
+
+1.  Compute **sensitivity**, **specificity**, **PPV**, and **NPV** of BMI \$\geq\$30 using DXA as the gold standard.
+2.  Fit an **age- and sex-adjusted spline model** predicting DXA %-fat from BMI, and examine residual error by subgroup.
+3.  Explore **alternative thresholds** (e.g., BMI \$\geq\$28) to optimize balanced accuracy in specific subpopulations.
+
+
+
