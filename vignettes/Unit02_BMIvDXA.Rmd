@@ -590,7 +590,7 @@ all_demo <- bind_rows(
 ) |>
   mutate(
     Approach = factor(Approach,
-      levels = c("Naive","Classical","postpi_analytic","ppi","ppi_plus","pspa","chen")
+      levels = c("Naive","Classical","postpi_analytic","ppi","ppi_plus","pspa")
     )
   )
 

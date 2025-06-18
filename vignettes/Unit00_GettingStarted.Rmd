@@ -396,7 +396,7 @@ inferential tasks (e.g., **mean** and **quantile** estimation, **ols**,
 > ```{r, class.source="fold-show", eval=FALSE} 
 > ipd(
 >   formula = Y - f ~ X1,     # The downstream inferential model
->   method  = "chen"          # The IPD method to run 
+>   method  = "pspa"          # The IPD method to run 
 >   model   = "ols"           # The type of inferential model
 >   data    = dat_ipd,        # A data.frame with columns:
 >                             #   - set_label: {"labeled", "unlabeled"}
@@ -446,7 +446,7 @@ ipd_model <- ipd(
   formula = Y - f ~ X1,
   data    = dat_ipd,
   label   = "set_label",
-  method  = "chen",
+  method  = "pspa",
   model   = "ols"
 )
 

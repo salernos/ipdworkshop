@@ -360,7 +360,7 @@ We now demonstrate how to perform valid inference on the relationship $y \sim x_
      true_col  = "y",
      pred_col  = "pred",
      label_col = "set_label",
-     method    = c("postpi_analytic","ppi","ppi_plus","pspa","chen"),
+     method    = c("postpi_analytic","ppi","ppi_plus","pspa"),
      nboot     = 300
    )
    ```
@@ -425,19 +425,19 @@ labeled_idx <- sample(seq_len(n_test), size = n_labeled)
 
 idp_fit_lm <- ipd(y - preds_lm ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
                   
-  method = "chen", model = "ols")
+  method = "pspa", model = "ols")
 
 idp_fit_dt <- ipd(y - preds_dt ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
                   
-  method = "chen", model = "ols")
+  method = "pspa", model = "ols")
 
 idp_fit_rf <- ipd(y - preds_rf ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
                   
-  method = "chen", model = "ols")
+  method = "pspa", model = "ols")
 
 idp_fit_nn <- ipd(y - preds_nn ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
                   
-  method = "chen", model = "ols")
+  method = "pspa", model = "ols")
 
 summary(class_fit)
 summary(naive_fit_lm)
@@ -463,7 +463,7 @@ summary(idp_fit_nn)
     true_col  = "y",
     pred_col  = "pred",
     label_col = "set_label",
-    method    = c("postpi_analytic","ppi","ppi_plus","pspa","chen"),
+    method    = "pspa",
     nboot     = 300
   )
   
