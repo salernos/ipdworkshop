@@ -19,12 +19,12 @@ Authors@R:
 Description: |
     A workshop demonstrating how to perform downstream statistical inference 
     when the outcome has been partially imputed via a machine learning model.  
-    The central R/Bioconductor package is ipd (Inference with Predicted Data).
+    The central R package is the ipd package (Inference with Predicted Data).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.3.2
 Depends:
     R (>= 4.0),
     ipd,
@@ -40,7 +40,22 @@ Imports:
     mgcv,
     pROC,
     ALL,
-    BiocGenerics
+    golubEsets,
+    AnnotationDbi,
+    hgu95av2.db,
+    hu6800.db,
+    BiocGenerics,
+    DALEX,
+    broom,
+    GGally,
+    MLInterfaces,
+    here,
+    janitor,
+    keggorthology,
+    neuralnet,
+    partykit,
+    randomForest,
+    scales
 Suggests:
     DT
 URL: https://salernos.github.io/ipdworkshop/

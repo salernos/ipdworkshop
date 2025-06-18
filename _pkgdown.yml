@@ -1,18 +1,21 @@
 url: https://salernos.github.io/ipdworkshop
 
 template:
-  params:
+  bootstrap: 5
+  lightswitch: true
+  bslib:
     bootswatch: flatly
-    #ganalytics: UA-99999999-9
+    pkgdown-nav-height: 100px
+    primary: "#1B365D"
 
 home:
   title: "Inference with Predicted Data Using the ipd Package"
   type: inverse
-
 
 navbar:
   right:
    - icon: fa-github
      href: https://github.com/salernos/ipdworkshop
 
-
+project:
+  render: ['*.qmd']

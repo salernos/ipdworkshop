@@ -1,0 +1,35 @@
+/*=== CUSTOM STYLING FOR CALLOUTS AND EXERCISES ==============================*/
+
+/*--- CALLOUTS ---------------------------------------------------------------*/
+
+.callout {
+  border-left: 4px solid #31708f;
+  border-radius: 3px;
+  margin: 1em 0;
+  padding: 0.5em;
+  background-color: #d9edf7;
+}
+
+.callout-quiz {
+  border-left-color: #3c763d;
+  background-color: #dff0d8;
+}
+
+.callout-warning {
+  border-left-color: #8a6d3b;
+  background-color: #fcf8e3;
+}
+
+/*--- EXERCISE ---------------------------------------------------------------*/
+
+.exercise {
+  margin: 1.5em 0;
+  padding: 1em;
+  background-color: #f5f5f5;
+  border: 1px solid #e1e1e8;
+  border-radius: 4px;
+}
+
+.exercise h4 {
+  margin-top: 0;
+}
