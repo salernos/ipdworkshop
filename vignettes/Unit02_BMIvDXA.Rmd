@@ -612,9 +612,9 @@ We now apply **IPD** to leverage all participants (labeled + unlabeled) while ad
 
 Now we can try to run the IPD model:
 
-```{r, error = TRUE, warning = TRUE}
+```{r, eval=FALSE}
 # Note: This code chunk results in an error, but we have an informative warning
-# We can run it and see!
+# We can try running it and see!
 ipd_bmi_fit <- ipd(
     formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
     method  = "pspa",
