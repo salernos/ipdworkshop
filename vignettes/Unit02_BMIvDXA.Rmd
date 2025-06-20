@@ -647,8 +647,11 @@ NHANES2 <- NHANES |>
   mutate(Age_recode = fct_collapse(Age, `40+` = c("40-59", "60+")))
       
 # Split NHANES into labeled (DXA available) vs unlabeled
-labeled2   <- NHANES2 |> filter(Cohort == "2017-2018")
-unlabeled2 <- NHANES2 |> filter(Cohort == "2021-2023")
+labeled2   <- NHANES2 |> 
+  filter(Cohort == "2017-2018") |> 
+  select(obese_DXA, obese_BMI, obese_WC, Age_recode, Sex, Race)
+unlabeled2 <- NHANES2 |> filter(Cohort == "2021-2023") |> 
+  select(obese_DXA, obese_BMI, obese_WC, Age_recode, Sex, Race)
 
 # Stack for IPD
 combined2 <- bind_rows(
