@@ -3,10 +3,10 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   Unit00_GettingStarted: Unit00_GettingStarted.html
-  Unit01_RashomanQuartet: Unit01_RashomanQuartet.html
+  Unit01_RashomonQuartet: Unit01_RashomonQuartet.html
   Unit02_BMIvDXA: Unit02_BMIvDXA.html
   Unit03_GeneticData: Unit03_GeneticData.html
-last_built: 2025-06-20T02:15Z
+last_built: 2025-06-20T03:36Z
 urls:
   reference: https://salernos.github.io/ipdworkshop/reference
   article: https://salernos.github.io/ipdworkshop/articles
