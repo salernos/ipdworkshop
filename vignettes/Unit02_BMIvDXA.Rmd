@@ -643,17 +643,17 @@ We can see that the *labeled* subset does *not* include any `"60+"` observations
 
 ```{r}
 # Recode age
-NHANES <- NHANES |>
+NHANES2 <- NHANES |>
   mutate(Age_recode = fct_collapse(Age, `40+` = c("40-59", "60+")))
       
 # Split NHANES into labeled (DXA available) vs unlabeled
-labeled   <- NHANES |> filter(Cohort == "2017-2018")
-unlabeled <- NHANES |> filter(Cohort == "2021-2023")
+labeled2   <- NHANES2 |> filter(Cohort == "2017-2018")
+unlabeled2 <- NHANES2 |> filter(Cohort == "2021-2023")
 
 # Stack for IPD
-combined <- bind_rows(
-  labeled   |> mutate(set_label = "labeled"),
-  unlabeled |> mutate(set_label = "unlabeled")
+combined2 <- bind_rows(
+  labeled2   |> mutate(set_label = "labeled"),
+  unlabeled2 |> mutate(set_label = "unlabeled")
 )
 ```
 
@@ -666,7 +666,7 @@ ipd_bmi_fit <- ipd(
     formula = obese_DXA - obese_BMI ~ Age_recode + Sex + Race,
     method  = "pspa",
     model   = "logistic",
-    data    = combined,
+    data    = combined2,
     label   = "set_label"
 )
 
@@ -674,8 +674,8 @@ ipd_wc_fit <- ipd(
     formula = obese_DXA - obese_WC ~ Age_recode + Sex + Race,
     method  = "pspa",
     model   = "logistic",
-    data    = labeled,
-    unlabeled_data = unlabeled
+    data    = labeled2,
+    unlabeled_data = unlabeled2
 )
 
 # Collect results using the tidy() method
@@ -690,19 +690,19 @@ ipd_wc_df  <- tidy(ipd_wc_fit) |>
 # Rerun previous models
 # Naive on unlabeled using BMI
 naive_bmi_fit <- glm(obese_BMI ~ Age_recode + Sex + Race, 
-  family = binomial, data = unlabeled)
+  family = binomial, data = unlabeled)2
 naive_bmi_df  <- broom::tidy(naive_bmi_fit) |>
   mutate(method = "Naive (BMI)")
 
 # Naive on unlabeled using WC
 naive_wc_fit <- glm(obese_WC ~ Age_recode + Sex + Race,
-  family = binomial, data = unlabeled)
+  family = binomial, data = unlabeled2)
 naive_wc_df  <- broom::tidy(naive_wc_fit) |>
   mutate(method = "Naive (WC)")
 
 # Classical on labeled using DXA
 class_fit <- glm(obese_DXA ~ Age_recode + Sex + Race,
-  family = binomial, data = labeled)
+  family = binomial, data = labeled2)
 class_df  <- broom::tidy(class_fit) |>
   mutate(method = "Classical (DXA)")
 
