@@ -608,25 +608,25 @@ We now apply **IPD** to leverage all participants (labeled + unlabeled) while ad
 
 Now we can try to run the IPD model:
 
-```{r, eval=FALSE}
+```{r error-chunk, eval=FALSE}
 # Note: This code chunk results in an error, but we have an informative warning
 # We can try running it and see!
 
-ipd_bmi_fit <- ipd(
-    formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
-    method  = "pspa",
-    model   = "logistic",
-    data    = combined,
-    label   = "set_label"
-)
-
-ipd_wc_fit <- ipd(
-    formula = obese_DXA - obese_WC ~ Age + Sex + Race,
-    method  = "pspa",
-    model   = "logistic",
-    data    = labeled,
-    unlabeled_data = unlabeled
-)
+# ipd_bmi_fit <- ipd(
+#     formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
+#     method  = "pspa",
+#     model   = "logistic",
+#     data    = combined,
+#     label   = "set_label"
+# )
+# 
+# ipd_wc_fit <- ipd(
+#     formula = obese_DXA - obese_WC ~ Age + Sex + Race,
+#     method  = "pspa",
+#     model   = "logistic",
+#     data    = labeled,
+#     unlabeled_data = unlabeled
+# )
 ```
 
 > **We get an informative warning:**
@@ -660,7 +660,7 @@ combined2 <- bind_rows(
 Now let us rerun `ipd::ipd()` and compare our results to the **Naive** and 
 **Classical** models:
 
-```{r}
+```{r recoded-chunk}
 # Note: This code chunk now runs without error!
 ipd_bmi_fit <- ipd(
     formula = obese_DXA - obese_BMI ~ Age_recode + Sex + Race,
