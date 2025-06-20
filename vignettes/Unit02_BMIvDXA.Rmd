@@ -693,7 +693,7 @@ ipd_wc_df  <- tidy(ipd_wc_fit) |>
 # Rerun previous models
 # Naive on unlabeled using BMI
 naive_bmi_fit <- glm(obese_BMI ~ Age_recode + Sex + Race, 
-  family = binomial, data = unlabeled)2
+  family = binomial, data = unlabeled2)
 naive_bmi_df  <- broom::tidy(naive_bmi_fit) |>
   mutate(method = "Naive (BMI)")
 
