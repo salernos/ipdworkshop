@@ -1,6 +1,6 @@
 # Inference with Predicted Data (IPD) Workshop
 
-## <img src="ipd.png" align="right" height="200" style="float:right; height:200px;"/>
+## <img src="vignettes/images/ipd.png" align="right" height="200" style="float:right; height:200px;"/>
 
 > What do we do after we have machine learned everything?
 
