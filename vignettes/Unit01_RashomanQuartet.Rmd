@@ -1,7 +1,7 @@
 ---
 title: "Unit 01: The Rashoman Quartet"
 author: "Stephen Salerno"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -28,12 +28,18 @@ In "Performance is not enough: the story of Rashomon's quartet"
 ([Biecek et al., 2023](https://www.tandfonline.com/doi/full/10.1080/10618600.2024.2344616)), 
 four different models (linear regression, decision trees, random forests, and
 neural networks) achieve near-identical predictive performance on the same 
-synthetic dataset. However, their interpretations vary significantly. In this 
-module, we will: 
+dataset. However, their interpretations vary significantly. In this module, 
+we will: 
 
-1. Fit each model on a **training** set. 
-2. Evaluate their performance on a **test** set. 
-3. Demonstrate how the **naive**, **classical**, and **IPD**-based inference results differ.
+1. **Fit** each model on a *training* set. 
+2. **Evaluate** their *predictive* performance on a *testing* set. 
+3. **Demonstrate** how the **naive**, **classical**, and **IPD**-based *inference* results differ.
+
+>
+> **Note:** We will replicate the results of the Rashoman Quartet analysis following:
+>
+> https://github.com/MI2DataLab/rashomon-quartet
+>
 
 ## Background on the Rashoman Quartet
 
@@ -49,42 +55,46 @@ extent, $X_2$, given by
 $$
 Y = \sin\left(\frac{3X_1 + X_2}{5}\right) + \varepsilon, \quad \varepsilon \sim \mathcal{N}\left(0, \frac{1}{3}\right).
 $$
-We note that $X_3$ does not appear in the true data generating mechanism, but 
-it is highly correlated with $X_1$ and $X_2$.
 
-Two independent batches of $n = 1,000$ observations (a "training" set and a 
-"testing" set) are generated under this model. We will fit the four candidate 
-models on the 1,000-row training data, and evaluated on them separately on the
-1,000-row testing data. As we will show, all four achieve $R^2 \approx 0.729$ 
-and $\mathrm{RMSE} \approx 0.354$ on the testing set. However, their 
+>
+> **Note:** $X_3$ does not appear in the true data generating mechanism, but is highly correlated with $X_1$ and $X_2$.
+>
+
+Two independent batches of 1,000 observations (a *training* set and a 
+*testing* set) are generated under this model. We will fit the four candidate 
+models on the 1,000-row *training* data, and evaluated on them separately on the
+1,000-row *testing* data. As we will show, all four achieve $R^2 \approx 0.729$ 
+and $\mathrm{RMSE} \approx 0.354$ on the *testing* set. However, their 
 interpretations diverge:
 
-* **Linear regression** captures a near-linear approximation of $\sin\!\bigl(\tfrac{3x_{1} + x_{2}}{5}\bigr)$.
+* **Linear regression** captures a near-linear approximation of $\sin\left(\tfrac{3X_{1} + X_{2}}{5}\right)$.
 * **Decision tree** approximates the nonlinear relationship via a small set of splits.
 * **Random forest** produces a smooth ensemble derivative of the tree.
 * **Neural network** learns a different nonlinear basis with hidden units.
 
+![*Source: https://github.com/MI2DataLab/rashomon-quartet*](images/rashoman_overview.png){width=100%}
+
 In addition to comparing interpretability across models, we will demonstrate 
-how to perform valid downstream inference for $Y \mid \boldsymbol{X}$ when $Y$ 
+how to perform valid downstream inference for $Y$ on $\boldsymbol{X}$ when $Y$ 
 is only partially observed. We will:
 
-1. **Train** each predictive model on the full 1,000-row training set.
-2. **Predict** on all 1,000 testing observations.
-3. **Randomly split** the 1,000 testing rows into two groups:
+1. **Train** each predictive model on the full 1,000-row *training* set.
+2. **Predict** on all 1,000 *testing* observations.
+3. **Randomly split** the 1,000 *testing* rows into two groups:
 
-   * **"Labeled"** subset (with true $T$ observed).
-   * **"Unlabeled"** subset (with only predicted $\hat{Y} = f(X)$).
-4. On the **test-labeled** subset, regress $Y \mid \boldsymbol{X}$ ("Classical").
-5. On the **test-unlabeled** subset, regress $\hat{Y} \mid \boldsymbol{X}$ ("Naive").
-6. Combine those two test subsets in an IPD pipeline using `ipd::ipd()` to correct bias and variance.
+   * *Labeled* subset (with true $Y$ observed).
+   * *Unlabeled* subset (with only predicted $f$).
+4. In the *labeled* subset, regress $Y$ on $\boldsymbol{X}$ ("Classical").
+5. In the *unlabeled* subset, regress $f$ on $\boldsymbol{X}$ ("Naive").
+6. Combine the two subsets and use `ipd::ipd()` to correct bias and variance.
 
-This mirrors realistic scenarios where the analyti dataset (here the testing 
-set) has only some observations labeled, and we want to use model predictions 
-for the rest while still making valid inference.
+This mirrors realistic scenarios where the *analytic* dataset (here the 
+*testing* set) has only some observations labeled, and we want to use model 
+predictions for the rest while still making valid inference.
 
 ## Setup and Data
 
-```{r load-packages}
+```{r}
 # Install if needed:
 # install.packages(c("ipd","DALEX","partykit","randomForest","neuralnet","GGally","tidyverse"))
 
@@ -93,7 +103,7 @@ library(DALEX)         # Model Explanation
 library(partykit)      # Decision Trees
 library(randomForest)  # Random Forests
 library(neuralnet)     # Neural Networks
-library(GGally)        # Pairwise Plots)
+library(GGally)        # Pairwise Plots
 library(tidyverse)     # Data Manipulation and Visualization
 ```
 
@@ -103,64 +113,35 @@ We have included two CSV files from the
 [MI2DataLab/rashomon-quartet](https://github.com/MI2DataLab/rashomon-quartet) 
 repository on GitHub. Note that these CSVs are *semicolon-delimited*.
 
-```{r read-csv}
-train_url <- "https://raw.githubusercontent.com/MI2DataLab/rashomon-quartet/main/rq_train.csv"
-test_url  <- "https://raw.githubusercontent.com/MI2DataLab/rashomon-quartet/main/rq_test.csv"
-
+```{r}
 # Use read_delim to parse semicolons
-train <- read_delim(train_url, delim = ";", col_types = cols(), show_col_types = FALSE)
-test  <- read_delim(test_url,  delim = ";", col_types = cols(), show_col_types = FALSE)
+train <- read_delim("data/rq_train.csv", delim = ";", col_types = cols(), show_col_types = FALSE)
+test  <- read_delim("data/rq_test.csv",  delim = ";", col_types = cols(), show_col_types = FALSE)
 
 # Show the first few rows of each
-cat("## Train – First 6 rows\n")
-print(head(train, 6))
-cat("\n## Test – First 6 rows\n")
-print(head(test, 6))
+glimpse(train)
+
+glimpse(test)
 ```
 
-### 2.1.1 Confirm Dimensions & Column Names
-
-Each CSV should have exactly 1,000 rows and 5 columns: `dataset`, `y`, `x1`, `x2`, `x3`. The "dataset" column takes values `"R1"`, `"R2"`, `"R3"`, or `"R4"`. We will ignore `dataset` when training our predictive models; it simply indicates which of the four generator-models produced that row.
-
-```{r inspect-dimensions}
-# Summarize dimensions and column names
-train %>%
-  summarize(
-    `Rows (train)` = n(),
-    `Columns (train)` = ncol(.),
-    `Names (train)` = paste(colnames(.), collapse = ", ")
-  ) %>%
-  print()
-
-test %>%
-  summarize(
-    `Rows (test)` = n(),
-    `Columns (test)` = ncol(.),
-    `Names (test)` = paste(colnames(.), collapse = ", ")
-  ) %>%
-  print()
-
-```
-
-> **Expected:**
+> **Confirm Dimensions and Column Names:**
 >
-> * Both `train` and `test` have 1,000 rows, 5 columns: `dataset, y, x1, x2, x3`.
+> * Each dataset should have exactly 1,000 rows and four columns: `y`, `x1`, `x2`, `x3`.
 > * We will use all 1,000 rows of `train` to fit each predictive model, and then randomly split the 1,000-row `test` for IPD.
 
----
+## Predictive Model Training on the Training Set
 
-# 3 Model Training on the Training Set
-
-Below, we fit four predictive models using the **entire** 1,000-row `train` dataset (ignoring the `dataset` column):
+Below, we fit four predictive models using the *training* set:
 
 1. **Decision Tree** via `ctree()` (max depth = 3, minsplit = 250).
 2. **Linear Regression** via `lm()`.
 3. **Random Forest** via `randomForest()` (100 trees).
 4. **Neural Network** via `neuralnet()` (two hidden layers: 8 units, 4 units; threshold = 0.05).
 
-We then evaluate each model's performance on the full 1,000-row `test` set using **DALEX** to extract $R^2$ and RMSE.
+We then evaluate each model's performance in the *testing* set using the `DALEX` 
+package to extract the model's $R^2$ and $RMSE$.
 
-```{r train-models}
+```{r}
 set.seed(1568)
 
 # 1) Decision Tree (ctree)
@@ -169,24 +150,28 @@ model_dt <- ctree(
   data    = train,
   control = ctree_control(maxdepth = 3, minsplit = 250)
 )
+
 exp_dt <- DALEX::explain(
   model   = model_dt,
-  data    = test %>% select(x1, x2, x3),
+  data    = test |> select(x1, x2, x3),
   y       = test$y,
   verbose = FALSE,
   label   = "Decision Tree"
 )
+
 mp_dt <- model_performance(exp_dt)
 
 # 2) Linear Regression
 model_lm <- lm(y ~ x1 + x2 + x3, data = train)
+
 exp_lm <- DALEX::explain(
   model   = model_lm,
-  data    = test %>% select(x1, x2, x3),
+  data    = test |> select(x1, x2, x3),
   y       = test$y,
   verbose = FALSE,
   label   = "Linear Regression"
 )
+
 mp_lm <- model_performance(exp_lm)
 
 # 3) Random Forest
@@ -195,13 +180,15 @@ model_rf <- randomForest(
   data    = train,
   ntree   = 100
 )
+
 exp_rf <- DALEX::explain(
   model   = model_rf,
-  data    = test %>% select(x1, x2, x3),
+  data    = test |> select(x1, x2, x3),
   y       = test$y,
   verbose = FALSE,
   label   = "Random Forest"
 )
+
 mp_rf <- model_performance(exp_rf)
 
 # 4) Neural Network
@@ -212,17 +199,20 @@ model_nn <- neuralnet(
   threshold    = 0.05,
   linear.output = TRUE
 )
+
 predict_nn <- function(object, newdata) {
   as.numeric(predict(object, newdata))
 }
+
 exp_nn <- DALEX::explain(
   model            = model_nn,
-  data             = test %>% select(x1, x2, x3),
+  data             = test |> select(x1, x2, x3),
   y                = test$y,
   predict_function = predict_nn,
   verbose          = FALSE,
   label            = "Neural Network"
 )
+
 mp_nn <- model_performance(exp_nn)
 
 # Save DALEX explainers for later reuse
@@ -249,57 +239,62 @@ perf_df
 ```
 
 > **Interpretation:**
-> All four models (Linear Regression, Decision Tree, Random Forest, Neural Network) deliver essentially identical predictive performance on the test set:
+> All four models (Linear Regression, Decision Tree, Random Forest, Neural Network) deliver essentially identical predictive performance on the *testing* set:
 >
 > $$
-> R^2 \approx 0.7290,\quad \mathrm{RMSE} \approx 0.3535.
+> R^2 \approx 0.729,\quad \mathrm{RMSE} \approx 0.354.
 > $$
 
----
-
-# 4 Inspecting the "Raw" Models
+## Inspecting the Prediction Models
 
 We now take a quick look at each model's internal structure or summary.
 
-## 4.1 Decision Tree Visualization
+>
+> **Note:** 
+>
+> * Often, in practice, we do not know the operating characteristics of the predictive model or have access to its training data. 
+> * IPD methods are distinct in that they are agnostic to the source or form of these 'black-box' predictions
+>
 
-```{r plot-decision-tree}
+### Decision Tree Visualization
+
+```{r, fig.width=12, fig.height=8, out.width="100%"}
 plot(model_dt, main = "Decision Tree (ctree) Structure")
 ```
 
-> The tree has depth 3, with splits on $x_1,x_2,x_3$ that approximate $\sin\!\bigl(\tfrac{3x_1 + x_2}{5}\bigr)$ piecewise.
+> The tree has depth 3, with splits on $x_1, x_2, x_3$ that approximate $\sin\left(\tfrac{3X_{1} + X_{2}}{5}\right)$ piecewise.
 
-## 4.2 Linear Regression Summary
+### Linear Regression Summary
 
-```{r summary-linear}
+```{r}
 summary(model_lm)
 ```
 
-> The OLS coefficients show how the linear model approximates the underlying sine-function. In particular, the slope on $x_1$ will be roughly an average of $\frac{3}{5}\cos(\cdot)$ over the training distribution.
+> The OLS coefficients show how the linear model approximates the underlying sine function. In particular, the slope on $x_1$ will be roughly an average of this over the training distribution.
 
-## 4.3 Random Forest Summary
+### Random Forest Summary
 
-```{r print-random-forest}
+```{r}
 model_rf
 ```
 
 > We see OOB MSE and variance explained on the training data. The forest builds many trees of depth >3 and averages them to approximate the sine structure.
 
-## 4.4 Neural Network Topology
+### Neural Network Topology
 
-```{r plot-neural-network, warning=FALSE}
+```{r, warning=FALSE, fig.height=15, fig.width=15, out.width="100%"}
 plot(model_nn, rep = "best", main = "Neural Network (8,4) Topology")
 ```
 
-> This diagram shows two hidden layers (8 units → 4 units) with activation functions that capture nonlinearity. The network approximates $\sin\bigl(\cdots\bigr)$ more flexibly than the tree or forest.
+> This diagram shows two hidden layers (8 units $\to$ 4 units) with activation functions that capture nonlinearity. The network approximates $\sin\left(\tfrac{3X_{1} + X_{2}}{5}\right)$ more flexibly than the decision tree or random forest.
 
----
+## Variable Importance (`DALEX`)
 
-# 5 Variable Importance (DALEX)
+Next, we compute variable importance for each model via `DALEX::model_parts()`. 
+We request `type="difference"` so that importance is measured in terms of loss 
+of performance (RMSE) when that variable is permuted.
 
-Next, we compute variable importance for each model via **DALEX::model\_parts()**. We request `type="difference"` so that importance is measured in terms of loss of performance (RMSE) when that variable is permuted.
-
-```{r variable-importance}
+```{r, fig.height=8, fig.width=8, out.width="100%", dpi=300}
 imp_dt <- model_parts(exp_dt, N = NULL, B = 1, type = "difference")
 imp_lm <- model_parts(exp_lm, N = NULL, B = 1, type = "difference")
 imp_rf <- model_parts(exp_rf, N = NULL, B = 1, type = "difference")
@@ -313,13 +308,13 @@ plot(imp_dt, imp_nn, imp_rf, imp_lm)
 > * Each model ranks features $(x_{1},x_{2},x_{3})$ by their impact on predictive accuracy.
 > * Because $\mathbf{x}$ are correlated, some models (e.g.\ tree, forest) may split differently than linear regression or neural network.
 
----
+## Partial-Dependence Plots (`DALEX`)
 
-# 6 Partial-Dependence Plots (DALEX)
+We now generate partial-dependence (PD) profiles for each feature under each
+model via `DALEX::model_profile()`. This shows how each model's predicted 
+$f$ changes when we vary one feature at a time, averaging out the others.
 
-We now generate **partial-dependence** (PD) profiles for each feature under each model via **DALEX::model\_profile()**. This shows how each model's predicted $\widehat y$ changes when we vary one feature at a time, averaging out the others.
-
-```{r partial-dependence}
+```{r, fig.width=8, fig.height=6, out.width="100%", dpi=300}
 pd_dt <- model_profile(exp_dt, N = NULL)
 pd_lm <- model_profile(exp_lm, N = NULL)
 pd_rf <- model_profile(exp_rf, N = NULL)
@@ -337,44 +332,40 @@ plot(pd_dt, pd_nn, pd_rf, pd_lm)
 >
 > Because $x_{3}$ does not appear in the generating formula, its PD should be nearly flat—though correlation can induce slight structure.
 
----
+## Inference with Predicted Data (IPD)
 
-# 7 Inference with Predicted Data (IPD)
+We now demonstrate how to perform valid inference in the *testing* set when 
+only some test rows have true $Y$. Specifically, we:
 
-We now demonstrate how to perform valid inference on the relationship $y \sim x_{1}$ in the **test** set when only some test rows have true $y$. Specifically:
+1. **Randomly split** the 1,000 *testing* rows into:
 
-1. **Train** each predictive model $M$ on the full 1,000-row training set.
-2. **Predict** $\widehat y$ for all 1,000 test rows using $M$.
-3. **Randomly split** the 1,000 test rows into:
-
-   * A **"labeled"** subset of size $n_\ell$ (we choose $n_\ell = 500$ by default; this can be adjusted).
-   * An **"unlabeled"** subset of size $n_u = 1{,}000 - n_\ell$.
-4. On the **test-labeled** subset, regress $y \sim x_{1}$ ("Classical").
-5. On the **test-unlabeled** subset, regress $\widehat y \sim x_{1}$ ("Naive").
-6. Combine the test-labeled and test-unlabeled subsets in an IPD pipeline—treating test-labeled $\{y, x_{1}\}$ as "labeled" and test-unlabeled $\{\widehat y, x_{1}\}$ as "unlabeled"—and run:
+   * A *labeled* subset of size $n_l$ (we choose 10%, but this can be adjusted).
+   * An *unlabeled* subset of size $n_u = 1,000 - n_l$.
+2. In the *labeled* subset, regress $Y$ on $X_1$, $X_2$, and $X_3$ (**Classical**).
+5. In the *unlabeled* subset, regress $f$ on $X_1$, $X_2$, and $X_3$ (**Naive**).
+6. Use both subsets in an **IPD** pipeline and run:
 
    ```r
    ipd_res <- ipd(
-     formula   = y ~ x1,
-     data      = combined_df,
-     true_col  = "y",
-     pred_col  = "pred",
-     label_col = "set_label",
-     method    = c("postpi_analytic","ppi","ppi_plus","pspa"),
-     nboot     = 300
+     formula        = y - f ~ x1 + x2 + x3,
+     data           = test_labeled,
+     unlabeled_data = test_unlabeled,
+     method         = "pspa",
+     model          = "ols"
    )
    ```
 
-   to obtain bias-corrected estimates of $\beta_{x_{1}}$.
+   to obtain bias-corrected estimates of $\beta_1$, $\beta_2$, and $\beta_3$.
+ 
+>  
+> **Note:** Instead of supplying one stacked dataset and the column name for the set labels, we can alternativel supply the *labeled* and *unlabeled* data separately.
+>
 
-Below is a helper function that, for a given predictive model $M$, conducts this entire process. By default, we split test 50–50.  You can modify `frac_labeled` if you want a different labeled/unlabeled ratio.
-
-```{r ipd-helper}
-
+```{r}
 set.seed(12345)
 
+# Predict outcomes in the testing set
 ipd_data <- test |>
-  
   mutate(
     
     preds_lm = c(predict(model_lm, newdata = test)),
@@ -382,199 +373,136 @@ ipd_data <- test |>
     preds_rf = c(predict(model_rf, newdata = test)),
     preds_nn = c(predict(model_nn, newdata = test)))
 
+# Randomly split the testing set into labeled and unlabeled subsets
+frac_labeled <- 0.1
 
-# 3) Randomly split test_pred_df into labeled vs unlabeled
-
-frac_labeled = 0.1
-n_test <- nrow(ipd_data)
+n_test    <- nrow(ipd_data)
 n_labeled <- floor(frac_labeled * n_test)
+
 labeled_idx <- sample(seq_len(n_test), size = n_labeled)
 
-  test_labeled   <- ipd_data %>%
-    slice(labeled_idx) %>%
-    mutate(set_label = "labeled")
+test_labeled <- ipd_data |>
+  slice(labeled_idx) |>
+  mutate(set_label = "labeled")
   
-  test_unlabeled <- ipd_data %>%
-    slice(-labeled_idx) %>%
-    mutate(set_label = "unlabeled")
+test_unlabeled <- ipd_data |>
+  slice(-labeled_idx) |>
+  mutate(set_label = "unlabeled")
 
 ```
 
-
-
-
-
-```{r, eval = FALSE}
-
-  # 4) Classical: regress y ~ x1 on test_labeled
-  class_fit <- lm(y ~ x1 + x2 + x3, data = test_labeled)
-  class_coef <- coef(summary(class_fit))["x1", c("Estimate", "Std. Error")]
+```{r}
+# Classical
+class_fit <- lm(y ~ x1 + x2 + x3, data = test_labeled)
+class_df  <- broom::tidy(class_fit) |>
+  mutate(method = "Classical") 
   
-  # 5) Naive: regress pred ~ x1 + x2 + x3 on test_unlabeled
-  naive_fit_lm  <- lm(preds_lm ~ x1 + x2 + x3, data = test_unlabeled)
-  naive_coef_lm <- coef(summary(naive_fit_lm))["x1", c("Estimate", "Std. Error")]
-  
-  naive_fit_dt  <- lm(preds_dt ~ x1 + x2 + x3, data = test_unlabeled)
-  naive_coef_dt <- coef(summary(naive_fit_dt))["x1", c("Estimate", "Std. Error")]
-  
-  naive_fit_rf  <- lm(preds_rf ~ x1 + x2 + x3, data = test_unlabeled)
-  naive_coef_rf <- coef(summary(naive_fit_rf))["x1", c("Estimate", "Std. Error")]
-  
-  naive_fit_nn  <- lm(preds_nn ~ x1 + x2 + x3, data = test_unlabeled)
-  naive_coef_nn <- coef(summary(naive_fit_nn))["x1", c("Estimate", "Std. Error")]
+# Naive (Linear Model)
+naive_fit_lm <- lm(preds_lm ~ x1 + x2 + x3, data = test_unlabeled)
+naive_df_lm  <- broom::tidy(naive_fit_lm) |>
+  mutate(method = "Naive (lm)") 
 
-idp_fit_lm <- ipd(y - preds_lm ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
-                  
+# Naive (Decision Tree)
+naive_fit_dt <- lm(preds_dt ~ x1 + x2 + x3, data = test_unlabeled)
+naive_df_dt  <- broom::tidy(naive_fit_dt) |>
+  mutate(method = "Naive (dt)") 
+
+# Naive (Random Forest)
+naive_fit_rf <- lm(preds_rf ~ x1 + x2 + x3, data = test_unlabeled)
+naive_df_rf  <- broom::tidy(naive_fit_rf) |>
+  mutate(method = "Naive (rf)") 
+
+# Naive (Neural Net)
+naive_fit_nn <- lm(preds_nn ~ x1 + x2 + x3, data = test_unlabeled)
+naive_df_nn  <- broom::tidy(naive_fit_nn) |>
+  mutate(method = "Naive (nn)") 
+
+# IPD (Linear Model)
+ipd_fit_lm <- ipd(y - preds_lm ~ x1 + x2 + x3, 
+  data = test_labeled, unlabeled_data = test_unlabeled, 
   method = "pspa", model = "ols")
+ipd_df_lm  <- tidy(ipd_fit_lm) |>
+  mutate(method = "IPD (lm)") 
 
-idp_fit_dt <- ipd(y - preds_dt ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
-                  
+# IPD (Decision Tree)
+ipd_fit_dt <- ipd(y - preds_dt ~ x1 + x2 + x3, 
+  data = test_labeled, unlabeled_data = test_unlabeled,
   method = "pspa", model = "ols")
+ipd_df_dt  <- tidy(ipd_fit_dt) |>
+  mutate(method = "IPD (dt)") 
 
-idp_fit_rf <- ipd(y - preds_rf ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
-                  
+# IPD (Random Forest)
+ipd_fit_rf <- ipd(y - preds_rf ~ x1 + x2 + x3, 
+  data = test_labeled, unlabeled_data = test_unlabeled,
   method = "pspa", model = "ols")
+ipd_df_rf  <- tidy(ipd_fit_rf) |>
+  mutate(method = "IPD (rf)") 
 
-idp_fit_nn <- ipd(y - preds_nn ~ x1 + x2 + x3, data = test_labeled, unlabeled_data = test_unlabeled,
-                  
+# IPD (Neural Net)
+ipd_fit_nn <- ipd(y - preds_nn ~ x1 + x2 + x3, 
+  data = test_labeled, unlabeled_data = test_unlabeled,
   method = "pspa", model = "ols")
+ipd_df_nn  <- tidy(ipd_fit_nn) |>
+  mutate(method = "IPD (nn)") 
 
-summary(class_fit)
-summary(naive_fit_lm)
-summary(naive_fit_dt)
-summary(naive_fit_rf)
-summary(naive_fit_nn)
-summary(idp_fit_lm)
-summary(idp_fit_dt)
-summary(idp_fit_rf)
-summary(idp_fit_nn)
-```
-
-
-
-
-```{r, eval = FALSE} 
-  # 6) IPD: combine test_labeled and test_unlabeled
-  df_combined <- bind_rows(test_labeled, test_unlabeled)
+combined_df <- bind_rows(class_df,
+  naive_df_lm, naive_df_dt, naive_df_rf, naive_df_nn,
+  ipd_df_lm,   ipd_df_dt,   ipd_df_rf,   ipd_df_nn) |>
   
-  ipd_res <- ipd(
-    formula   = y ~ x1,
-    data      = df_combined,
-    true_col  = "y",
-    pred_col  = "pred",
-    label_col = "set_label",
-    method    = "pspa",
-    nboot     = 300
-  )
-  
-  ipd_tab <- map_dfr(ipd_res, ~ tibble(
-    Method       = .x$method_name,
-    Estimate     = .x$estimate,
-    `Std. Error` = .x$se_estimate
-  ))
-  
-  # 7) Combine results into one tibble
-  result <- bind_rows(
-    tibble(
-      Method       = glue::glue("Naive ({model_label})"),
-      Estimate     = naive_coef["Estimate"],
-      `Std. Error` = naive_coef["Std. Error"]
-    ),
-    tibble(
-      Method       = glue::glue("Classical ({model_label})"),
-      Estimate     = class_coef["Estimate"],
-      `Std. Error` = class_coef["Std. Error"]
-    ),
-    ipd_tab %>%
-      mutate(Method = paste0(Method, " (", model_label, ")"))
-  ) %>%
-    mutate(
-      Lower = Estimate - 1.96 * `Std. Error`,
-      Upper = Estimate + 1.96 * `Std. Error`,
-      Model = model_label
-    )
-
-
-# Combine all IPD results
-ipd_all <- bind_rows(ipd_lm_df, ipd_dt_df, ipd_rf_df, ipd_nn_df) %>%
   mutate(
-    Method = factor(
-      Method,
-      levels = c(
-        "Naive (Linear Regression)", "Classical (Linear Regression)",
-        "postpi_analytic (Linear Regression)", "ppi (Linear Regression)",
-        "ppi_plus (Linear Regression)", "pspa (Linear Regression)", "chen (Linear Regression)",
-        "Naive (Decision Tree)", "Classical (Decision Tree)",
-        "postpi_analytic (Decision Tree)", "ppi (Decision Tree)",
-        "ppi_plus (Decision Tree)", "pspa (Decision Tree)", "chen (Decision Tree)",
-        "Naive (Random Forest)", "Classical (Random Forest)",
-        "postpi_analytic (Random Forest)", "ppi (Random Forest)",
-        "ppi_plus (Random Forest)", "pspa (Random Forest)", "chen (Random Forest)",
-        "Naive (Neural Network)", "Classical (Neural Network)",
-        "postpi_analytic (Neural Network)", "ppi (Neural Network)",
-        "ppi_plus (Neural Network)", "pspa (Neural Network)", "chen (Neural Network)"
-      )
-    )
+    conf.low  = estimate - 1.96 * std.error,
+    conf.high = estimate + 1.96 * std.error
   )
 
-ipd_all
+combined_df
 ```
 
-## 7.1 Plotting IPD Estimates for $\beta_{x1}$
+### Plotting The Model Estimates
 
-We now visualize, for each predictive model, the estimated slope $\hat\beta_{x1}$ ± 1.96·SE from:
+We now visualize, for each predictive model, the estimated coefficients and
+95% confidence intervals from each inference method:
 
-* **Naive** (test-unlabeled only: $\widehat y \sim x_1$),
-* **Classical** (test-labeled only: $y \sim x_1$),
-* **IPD** methods (PostPI, PPI, PPI++, PSPA, Chen).
+>
+> **Note:** The vertical dashed line marks the estimated slope for the **Classical** method, which serves as our benchmark for comparison.
+>
 
-A vertical dashed line at $x = 1$ marks the "ideal" average slope for $\sin\bigl(\tfrac{3x_1 + x_2}{5}\bigr)$ under standardization.
+```{r, fig.width=10, fig.height=8, out.width="100%"}
+ref_lines <- combined_df %>% 
+  filter(method == "Classical") %>% 
+  select(term, estimate)
 
-```{r plot-ipd-comparison, fig.width=10, fig.height=8, eval = FALSE}
-ggplot(ipd_all, aes(x = Estimate, y = Method, color = Method)) +
+ggplot(combined_df, aes(x = estimate, y = method, color = method)) +
   geom_point(size = 2) +
-  geom_errorbarh(aes(xmin = Lower, xmax = Upper), height = 0.2) +
-  facet_wrap(~ Model, ncol = 2, scales = "free_x") +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "black") +
-  labs(
-    title = "IPD: Naive vs Classical vs PostPI/PPI/PPI++/PSPA/Chen for Slope β₁",
-    subtitle = "Each Panel = predictive model used for \u005E y (test Predictions)",
-    x       = expression(hat(β)[x1]),
-    y       = ""
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  facet_wrap(~ term, ncol = 4, scales = "free_x") +
+  geom_vline(
+    data = ref_lines,
+    aes(xintercept = estimate),
+    linetype = "dashed",
+    color    = "black"
   ) +
+  labs(
+    x = expression(hat(beta)),
+    y = "") +
   theme_minimal() +
   theme(legend.position = "none")
 ```
 
-> ### Interpretation of IPD Results
+> **Interpretation of Results**
 >
-> For each predictive model:
+> 1. The **Naive** estimates are biased due to the prediction error and has artificially narrow confidence intervals.
+> 2. The **Classical** is our benchmark, as it is unbiased, but has wider CI's
+> 3. The **IPD** methods cover the **Classical** estimates and have wider CI's to account for the prediction uncertainty.
 >
-> 1. **Naive (test-unlabeled only)** often under-estimates $\beta_{x1}$ because prediction error attenuates slope.
-> 2. **Classical (test-labeled only)** uses only half of the test rows (true $y$) and is unbiased but has wider CI.
-> 3. **IPD methods** combine the labeled/unlabeled subsets in the test set, adjusting for prediction error:
->
->    * **postpi\_analytic**: analytic bias correction; may understate uncertainty.
->    * **ppi** / **ppi\_plus**: plug-in bootstrap corrections; PPI++ adds an extra layer to PPI.
->    * **pspa**: posterior-sampling approach; often yields best coverage under nonlinearity or outliers.
->    * **chen**: the Chen & Chen (2019) procedure.
->
-> Notice how:
->
-> * With **Linear Regression** as the predictor, the **Classical** slope on the 500 labeled test rows is near 1.0, and IPD methods (especially PSPA) cluster tightly around 1.0 with narrower CIs.
-> * With **Decision Tree** or **Random Forest**, prediction error is larger, so the **Naive** slope on the 500 unlabeled test rows is biased downward. IPD methods correct that bias to varying degrees, with PSPA usually closest to 1.0.
-> * With **Neural Network**, because the network approximates the sine more accurately, the **Naive** slope on the 500 unlabeled test rows is nearer 1.0 than in tree or forest; IPD methods cluster around 1.0 with small SEs.
 
----
+## Data Distribution: Train vs Test (`GGally::ggpairs`)
 
-# 8 Data Distribution: Train vs Test (GGally::ggpairs)
+Finally, we visualize pairwise relationships among $(x_{1},x_{2},x_{3},y)$ for train vs test. This confirms that train and test were drawn from the same synthetic distribution.
 
-Finally, we visualize pairwise relationships among $(x_{1},x_{2},x_{3},y)$ for train vs test (color-coded). This confirms that train and test were drawn from the same synthetic distribution.
-
-```{r plot-pairs, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6, out.width="100%", dpi=300}
 both <- bind_rows(
-  train %>% mutate(label = "train"),
-  test  %>% mutate(label = "test")
+  train |> mutate(label = "train"),
+  test  |> mutate(label = "test")
 )
 
 ggpairs(
@@ -595,7 +523,7 @@ ggpairs(
   theme_minimal() +
   labs(
     title    = "Pairwise Distribution: Train vs Test (x1,x2,x3,y)",
-    subtitle = "Color = train (green) vs test (purple)"
+    subtitle = "Color = train (blue) vs test (pink)"
   )
 ```
 
@@ -604,13 +532,11 @@ ggpairs(
 > * The diagonals show almost identical marginal distributions of $x_{1},x_{2},x_{3},y$ in train vs test.
 > * The off-diagonals confirm the covariance structure $\Sigma$ is consistent across both sets.
 
----
-
-# 9 Summary & Takeaways
+## Summary and Takeaways
 
 1. **Predictive Performance:**
 
-   * Linear Regression, Decision Tree, Random Forest, and Neural Network each achieve nearly identical test-set performance ($R^2 \approx 0.729, \mathrm{RMSE} \approx 0.3535$).
+   * Linear Regression, Decision Tree, Random Forest, and Neural Network each achieve nearly identical test set performance ($R^2 \approx 0.729, \mathrm{RMSE} \approx 0.354$).
 2. **Model Interpretability:**
 
    * Variable Importance and Partial-Dependence plots highlight how each model "tells a different story" about which features matter and how $y$ responds to $x_{1},x_{2},x_{3}$.
@@ -618,18 +544,18 @@ ggpairs(
 3. **Inference on Predicted Data (IPD):**
 
    * By randomly splitting the test set into "labeled" and "unlabeled" halves, we simulate a real-world scenario where only some new observations have true $y$.
-   * **Naive** regression of $\widehat y \sim x_{1}$ on the unlabeled half is biased downward due to prediction error.
-   * **Classical** regression of $y \sim x_{1}$ on the labeled half is unbiased but less efficient (wider CI).
-   * **IPD** methods (PostPI, PPI, PPI++, PSPA, Chen) combine the labeled/unlabeled halves to correct bias and properly estimate variance. **PSPA** often has the best coverage in outlier-prone or mis-specified cases.
+   * **Naive** regression of $f \sim x_{1} + x_{2} + x_{3}$ on the unlabeled set is biased due to prediction error.
+   * **Classical** regression of $y \sim x_{1} + x_{2} + x_{3}$ on the labeled set is unbiased but less efficient.
+   * **IPD** methods  combine the labeled/unlabeled sets to correct bias and properly estimate variance. 
 4. **Key Lesson:**
 
    * **"Performance is not enough."** Even models with identical $R^2$ can lead to very different bias and variance in downstream inference on covariate effects. IPD provides a principled correction when using model predictions in place of true outcomes for some observations.
 
----
-
 ## References
 
-* **Biecek, P.**, Baniecki, H., Krzyziński, M., & Cook, D. (2024). *Performance is not enough: the story of Rashomon's quartet.* [arXiv:2302.13356v2](https://arxiv.org/abs/2302.13356v2).
-* **MI2DataLab**. (2023). *Rashomon Quartet*, GitHub repository: [https://github.com/MI2DataLab/rashomon-quartet](https://github.com/MI2DataLab/rashomon-quartet).
-* **Molnar, C.**, Bischl, B., Casalicchio, G., & Wright, M. N. (2023). *Relating the Partial Dependence Plot and Permutation Feature Importance to the Data Generating Process.* xAI.
-* **Friedman, J. H.** (2001). *Greedy Function Approximation: A Gradient Boosting Machine.* Annals of Statistics.
+* Biecek, Przemysław, et al. "Performance is not enough: The story told by a Rashomon Quartet." *Journal of Computational and Graphical Statistics* 33.3 (2024): 1118-1121. 
+* MI2DataLab. "The Rashomon Quartet." [*GitHub repository*](https://github.com/MI2DataLab/rashomon-quartet) (2023).
+
+---
+
+*This is the end of the module. We hope this was informative! For question/concerns/suggestions, please reach out to ssalerno@fredhutch.org*

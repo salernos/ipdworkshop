@@ -1,12 +1,5 @@
 #===============================================================================
-#
-#  PROGRAM: NHANES_DATA.R
-#
-#  AUTHORS: Adam Visokay ()
-#           Stephen Salerno
-#
-#  PURPOSE:
-#
+# NHANES_DATA.R
 #===============================================================================
 
 #=== SETUP =====================================================================
@@ -94,9 +87,8 @@ DAT_L <- DEMO_L |>
     BMXBMI,    # Body Mass Index (kg/m^2)
     BMXWAIST,  # Waist Circumference (cm)
     SMQ040,    # Do you now smoke cigarettes?
-    SMQ621
-    # ,    # Cigarettes smoked in entire life
-    # SMQ050Q    # How long since quit smoking cigarettes                        ## CHECK THIS!
+    SMQ621,    # Cigarettes smoked in entire life
+    SMQ050Q    # How long since quit smoking cigarettes
   ) |>
 
   #- Filter Out Participants Missing BMI or WC
@@ -222,15 +214,3 @@ NHANES <- bind_rows(DAT_J, DAT_L) |>
 
 # save output as .rds file
 save(NHANES, file = "./vignettes/data/NHANES.RData")
-
-
-
-
-
-
-
-# ----- NHANES DATA PREPARATION -----
-## This script will download Demographic (DEMO) and
-## Body Measures (BMX) data from NHANES for survey
-## years 1999-2023 and DXA data for survey years 1999-2005
-## and 2011-2017. The output is saved as a .csv to the ../data folder.

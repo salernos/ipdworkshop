@@ -1,118 +1,150 @@
-# Introduction and Motivation
+# Inference with Predicted Data (IPD) Workshop
 
-Artificial intelligence and machine learning (AI/ML) have become essential tools in biomedical research, enabling large-scale analyses across diverse domains such as genomics, structural biology, and electronic health records-based research. Increasingly, researchers rely on model-generated predictions, rather than directly measured variables, as inputs for downstream statistical analyses. For example, predicted gene expression values or polygenic risk scores are often used in place of experimental assays, allowing researchers to expand cohort sizes and explore hypotheses when traditional data collection is infeasible, costly, or time-consuming.
+## <img src="inst/images/ipd.png" align="right" height="200" style="float:right; height:200px;"/>
 
-While this practice of "using predictions as data" holds promise for accelerating scientific discovery, it presents significant challenges for statistical inference. When predicted values are used in place of true variables, the resulting estimates of association can be biased and misleading if uncertainty in the prediction step is not properly accounted for. 
+> What do we do after we have machine learned everything?
 
-In this workshop, we explore the consequences of inference on predicted data across several biomedical applications.  Drawing from classical approaches to measurement error and recent developments in bias correction, we will present a suite of prediction-based inference methods that adjust for prediction-related uncertainty and improve inference validity and efficiency. We will also introduce {ipd}, a user-friendly Bioconductor R package that implements several of these correction methods through a unified interface. The package supports modular integration into existing workflows and includes tidy methods for model inspection and diagnostics.
+**Presenters:**
+    Stephen Salerno^[[ssalerno@fredhutch.org](mailto:ssalerno@fredhutch.org)]
 
+**Contributors (Alphabetical Order):**
+    Awan Afiaz^[[aafiaz@uw.edu](mailto:aafiaz@uw.edu)],
+    David Cheng^[[dcheng@mgh.harvard.edu](mailto:dcheng@mgh.harvard.edu)],
+    Jianhui Gao^[[jianhui.gao@mail.utoronto.ca](mailto:jianhui.gao@mail.utoronto.ca)], 
+    Jesse Gronsbell^[[j.gronsbell@utoronto.ca](mailto:j.gronsbell@utoronto.ca)],
+    Kentaro Hoffman^[[khoffm3@uw.edu](mailto:khoffm3@uw.edu)],
+    Jeff Leek^[[jtleek@fredhutch.org](mailto:jtleek@fredhutch.org)],
+    Qiongshi Lu^[[qlu@biostat.wisc.edu](mailto:qlu@biostat.wisc.edu)],
+    Tyler McCormick^[[tylermc@uw.edu](mailto:tylermc@uw.edu)],
+    Jiacheng Miao^[[jmiao24@wisc.edu](mailto:jmiao24@wisc.edu)],     
+    Anna Neufeld^[[acn2@williams.edu](mailto:acn2@williams.edu)],
+    Stephen Salerno^[[ssalerno@fredhutch.org](mailto:ssalerno@fredhutch.org)]
 
-
-
-
-################################################################################
-
-
-
-
-In many modern data science applications, it is common to encounter settings 
-where measuring a particular outcome, $Y$, is expensive or time-consuming, 
-whereas predictions, $\hat{Y} = f(X)$, from a machine learning model are 
-readily available on largedatasets. The `ipd` package provides a suite of 
-methods to perform valid  statistical inference on when some outcomes are 
-observed (labeled) and others are only predicted.
-
-In this workshop, you will learn:
-
-* The theoretical foundation behind prediction-powered inference (PPI) and its extensions.
-* How to use **ipd** functions to simulate data, fit models, and extract inference results.
-* Practical exercises to compare naive estimators with IPD methods.
-
-By the end, you should be able to design analyses that leverage large unlabeled datasets while maintaining correct uncertainty quantification.
-
-## The Augmented Data Scheme
-
-Consider three sets of observations:
-
-* **Training set**: ${(X_i, Y_i)}*{i=1}^{n*\text{train}}$, used to fit a predictive model $f(\cdot)$.
-* **Labeled set**: ${(X_i, Y_i)}*{i=1}^{n*\ell}$, smaller sample with true outcomes.
-* **Unlabeled set**: ${X_i}*{i=n*\text{train}+n_\ell+1}^{n_\text{train}+n_\ell+n_u}$, only features available.
-
-After fitting $f$ on the training set, we apply it to the labeled and unlabeled sets to obtain predictions $f_i = f(X_i)$. We then construct an **augmented dataset**:
-
-```plaintext
-+---------------+      +---------------+      +----------------+
-| Training (T)  | ---> | Labeled (L)   | ---> | Unlabeled (U)  |
-| (X, Y)        |      | (X, Y, f)     |      | (X, f)         |
-+---------------+      +---------------+      +----------------+
-```
-
-We treat $f_i$ in the unlabeled set as surrogate outcomes and combine them with observed $Y_i$ in the labeled set to estimate regression parameters $\beta$.
-
-## Key Formulas
-
-### Naive Estimator
-
-Using only the unlabeled predictions, the naive OLS estimator solves
-
-$$
-\hat\beta_{\text{naive}} = \arg\min_\beta \sum_{i\in U} \bigl(f_i - X_i^T\beta\bigr)^2.
-$$
-
-
-
-# This Workshop
-
-Welcome! This workshop provides a brief introduction to performing valid statistical inference when your outcome has been partially imputed by a machine learning model. The central package is [**ipd**](https://bioconductor.org/packages/ipd/), which implements several recent methods for conducting inference with predicted data (IPD).
-
-> **Prerequisites**  
-> 1. R (≥ 4.1) and Bioconductor installed  
-> 2. The `ipd` package:  
->    ```r
->    if (!requireNamespace("BiocManager", quietly = TRUE))
->        install.packages("BiocManager")
->    BiocManager::install("ipd")
->    ```
-> 3. Supporting packages:
->    ```r
->    install.packages(c("tidyverse", "patchwork", "NHANES", "rashomonquartet", "ranger", "mgcv", "pROC", "ALL"))
->    BiocManager::install(c("BiocStyle", "Biobase", "BiocGenerics"))
->    ```
+**Last modified:** June 18, 2025
 
 ---
 
-## Workshop Structure
+## Background and Motivation
 
-There are four hands‐on tutorials (R Markdown vignettes). Each vignette loads or simulates data, trains a prediction model, applies `ipd::ipd()`, and includes exercises:
+Artificial intelligence and machine learning (AI/ML) have become essential 
+tools in biomedical research, enabling large-scale analyses across diverse 
+domains such as genomics, structural biology, and electronic health records-
+based research. Increasingly, researchers rely on model-generated predictions, 
+rather than directly measured variables, as inputs for downstream statistical 
+analyses. For example, predicted gene expression values or polygenic risk 
+scores are often used in place of experimental assays, allowing researchers 
+to expand cohort sizes and explore hypotheses when traditional data collection 
+is infeasible, costly, or time-consuming.
 
-1. [Chapter 1: Simulated Data](vignettes/01-simulated-data.html)  
-   - Fully synthetic linear‐regression example  
-   - Compare naïve, classical, and PPI/PPI++/PostPI/PSPA methods  
-   - Residual diagnostics and bootstrap coverage
+While this practice of "using predictions as data" holds promise for 
+accelerating scientific discovery, it presents significant challenges for 
+statistical inference. When predicted values are used in place of true 
+variables, the resulting estimates of association can be biased and misleading 
+if uncertainty in the prediction step is not properly accounted for. 
 
-2. [Chapter 2: Rashomon Quartet](vignettes/02-rashomon-quartet.html)  
-   - Illustrate how four datasets with identical summary statistics can behave very differently  
-   - Show why naïve regression on predictions can fail under nonlinearity or outliers  
-   - Compare IPD corrections (PPI, PPI++, PSPA) across R1–R4 scenarios
+## Workshop Overview
 
-3. [Chapter 3: NHANES Body Fat vs BMI](vignettes/03-nhanes-bodyfat.html)  
-   - Real‐world data from NHANES (DXA percent body fat vs BMI)  
-   - Fit a linear (or nonlinear) prediction model on labeled participants  
-   - Use IPD to estimate the effect of Age on true percent body fat (correcting for bias)
+In this workshop, we explore the consequences of inference on predicted data 
+across several biomedical applications. Drawing from classical approaches to 
+measurement error and recent developments in bias correction, we will present 
+a suite of prediction-based inference methods that adjust for 
+prediction-related uncertainty and improve inference validity and efficiency. 
+We will also introduce [`ipd`](https://github.com/ipd-tools/ipd), a 
+user-friendly R package that implements several of these correction methods 
+through a unified interface. The package supports modular integration into 
+existing workflows and includes 
+[`tidy`](https://broom.tidymodels.org/index.html) methods for model inspection 
+and diagnostics.
 
-4. [Chapter 4: Genetic Data (Bioconductor `ALL`)](vignettes/04-genetic-data.html)  
-   - A binary IPD example using leucemia microarray data (`ALL` package)  
-   - Fit a logistic model (CD19‐based) to predict BCR/ABL labels  
-   - Apply IPD to estimate the log‐odds effect of CD38 expression on true BCR/ABL status
+This workshop covers four modules (time permitting), each illustrating IPD in R 
+using the [`ipd`](https://github.com/ipd-tools/ipd) package:
 
----
+1. **Unit 00: Getting Started**
 
-## How to Build & View Locally
+   * **Introduce** IPD concepts and core [`ipd`](https://github.com/ipd-tools/ipd) package functions
+   * **Simulate** data and explore the bias and variance of AI/ML predictions versus 'real' data
+   * **Fit** naive and classical inference models and compare with IPD methods
 
-1. Clone or download this repository:
+2. **Unit 01: The Rashomon Quartet**
 
-```bash
-git clone https://github.com/salernos/ipdworkshop.git
-cd ipdworkshop
+   * **Train** multiple prediction models on the [Rashomon Quartet](https://github.com/MI2DataLab/rashomon-quartet) training set
+   * **Compare** the performances of the upstream predictions on the [Rashomon Quartet](https://github.com/MI2DataLab/rashomon-quartet) testing set
+   * **Recover** classical estimates using IPD and contrast with naive estimates
+
+3. **Unit 02: Different Measures of Adiposity**
+
+   * **Explore** the [National Health and Nutrition Examination Survey (NHANES)](https://www.cdc.gov/nchs/nhanes/index.html) pre- and post- COVID-19
+   * **Define** obesity based body mass index, waist circumference, and gold-standard dual-energy X-ray absorptiometry
+   * **Demonstrate** how conclusions differ for naive, classical, and IPD logistic regression
+
+4. **Unit 03: BCR-ABL Fusion in B-Cell Leukemia**
+
+   * **Learn** gene expression classifiers for [acute lymphoblastic leukemia (ALL)](https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html) genetic subtypes
+   * **Harmonize** features across [different](https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html) [arrays](https://www.bioconductor.org/packages/release/data/experiment/html/golubEsets.html) and predict BCR-ABL1 (Philadelphia chromosome) fusion status
+   * **Perform** IPD to estimate associations between fusion status and clinical risk factors
+
+### Participation
+
+This 90-minute workshop uses a blended format of **instruction** and 
+**hands-on coding exercises**. Participants should:
+
+* Follow along in the virtual RStudio environment (see below).
+* Attempt to complete brief exercises or run the solution code snippets in real time.
+* Engage in Q&A at module boundaries to troubleshoot and discuss concepts.
+
+### Prerequisites
+
+* A computer with internet to access the **RStudio Virtual Environment** (see below).
+* Familiarity with **base R** and **tidyverse** syntax (e.g., `dplyr`, `broom`).
+* Basic understanding of predictive (e.g., `randomForest`) and regression modeling (e.g., `lm`, `glm`).
+* Exposure to Bioconductor's **ExpressionSet**, **AnnotationDbi**, and `MLInterfaces` is helpful for the last module.
+
+### _R_ / _Bioconductor_ Packages Used
+
+* *Datasets*: `nhanesA`, `ALL`, `golubEsets`, `AnnotationDbi`, `hgu95av2.db`, `hu6800.db`
+    
+* *Data Manipulation and Visualization*: `broom`, `scales`, `janitor`, `GGally`, `patchwork`, `tidyverse`
+
+* *Predictive Modeling:* `neuralnet`, `partykit`, `randomForest`, `ranger`, `mgcv`, `pROC`, `DALEX`, `MLInterfaces`
+
+* *Inference with Predicted Data:*, `ipd`
+    
+### Time Outline (90 minutes)
+
+| Activity                                   | Time |
+| ------------------------------------------ | ---- |
+| Brief Overview of the Problem              | 15 m |
+| Unit 00: Getting Started                   | 15 m |
+| Unit 01: The Rashoman Quartet              | 15 m |
+| Unit 02: Different Measures of Adiposity   | 15 m |
+| Unit 03: BCR-ABL Fusion in B-Cell Leukemia | 15 m |
+| Wrap-Up and Q&A                            | 15 m |
+
+### Workshop Goals and Objectives
+
+*Learning Goals:*
+
+* **Understand** the limitations of using predicted data for inference.
+* **Learn** how IPD methods adjust for bias and recover valid uncertainty estimates.
+* **Gain** practical skills with the [`ipd`](https://github.com/ipd-tools/ipd) R package across simulated and real datasets.
+
+*Learning Objectives:* By the end of the workshop, participants will be able to:
+
+* **Train** and evaluate predictive models (LDA, neural nets, random forests) using R and Bioconductor workflows.
+* **Explore** data with AI/ML-predicted outcomes and diagnose bias/variance in predictions.
+* **Apply** `ipd::ipd()` for continuous and binary outcomes to correct inference using predicted data.
+* **Interpret** IPD outputs and visualize adjusted coefficient estimates with confidence intervals.
+
+## Workshop Environment 
+
+The companion website for this workshop is available at: 
+
+[https://salernos.github.io/ipdworkshop](https://salernos.github.io/ipdworkshop)
+
+To use the workshop image:
+
+```sh
+docker run -e PASSWORD=<choose_a_password_for_rstudio> -p 8787:8787 ghcr.io/salernos/ipdworkshop:latest
 ```
 
+Once running, navigate to http://localhost:8787/ and then login with `rstudio`:`yourchosenpassword`. 

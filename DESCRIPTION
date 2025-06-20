@@ -35,7 +35,7 @@ Imports:
     rmarkdown,
     tidyverse,
     patchwork,
-    NHANES,
+    nhanesA,
     ranger,
     mgcv,
     pROC,
@@ -57,7 +57,8 @@ Imports:
     randomForest,
     scales
 Suggests:
-    DT
+    DT,
+    dplyr
 URL: https://salernos.github.io/ipdworkshop/
 BugReports: https://github.com/salernos/ipdworkshop/issues/new/choose
 VignetteBuilder: knitr

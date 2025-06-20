@@ -1,12 +1,11 @@
 ---
 title: "Unit 00: Getting Started"
 author: "Stephen Salerno"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 2
-    code_folding: "hide"
 vignette: >
   %\VignetteIndexEntry{Unit 00: Getting Started}
   %\VignetteEngine{knitr::rmarkdown}
@@ -25,11 +24,11 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-Welcome to this workshop on **Inference with Predicted Data (IPD)**! In this 
+Welcome to this workshop on *Inference with Predicted Data (IPD)*! In this 
 module, we will:
 
-* Introduce the `ipd` package and its main functions.
-* Demonstrate how to generate synthetic data for different models.
+* Introduce the [`ipd`](https://github.com/ipd-tools/ipd) package and its main functions.
+* Demonstrate how to generate synthetic data for different types of outcomes.
 * Fit and compare various IPD methods.
 * Inspect results using built-in `tidy`, `glance`, and `augment` methods.
 
@@ -37,33 +36,118 @@ Throughout the workshop, exercises are provided with solutions for practice.
 
 ## Background and Motivation
 
-When an outcome $Y$ is costly or difficult to measure, it can be tempting to 
-replace missing values with predictions $\hat{Y} = f(\boldsymbol{X})$ from a 
-machine learning model (e.g., random forest or neural network) built on easier-to-measure features, $\boldsymbol{X}$. However, using $\hat{Y}$ as if 
+When an outcome, $Y$, is costly or difficult to measure, it can be tempting to 
+replace missing values with predictions, $f(\boldsymbol{X})$, from a 
+machine learning model (e.g., a random forest or neural network) built on easier-to-measure features, $\boldsymbol{X}$. However, using $f$ as if 
 it were the true outcome in downstream analyses, e.g., in estimating a 
-regression coefficient, $\beta$, for $Y \mid \boldsymbol{X}$, leads to biased 
-point estimates and underestimated uncertainty.  
+regression coefficient, $\beta$, for the association between $Y$ and 
+$\boldsymbol{X}$, leads to biased point estimates and underestimated 
+uncertainty. Methods for 
+[Inference with Predicted Data (IPD)](https://academic.oup.com/bioinformatics/article/41/2/btaf055/7997267) 
+address this by leveraging a small subset of "labeled" data with true $Y$ 
+values to calibrate inference in a larger "unlabeled" dataset. 
 
-Inference with predicted data (IPD) addresses this by collecting a small subset 
-of "labeled" data with true $Y$ values to calibrate inference in a larger 
-"unlabeled" set. The `ipd` package implements several recent methods for
-IPD such as **Chen & Chen**, **PPI**, **PPI++**, **PostPI**, and **PSPA** to 
-produce valid, efficient inference, even when a large proportion of outcomes 
+## The IPD Framework
+
+Consider data arising from three sets of observations:
+
+* **Training Set**: $\{(X_j, Y_j)\}_{j=1}^{n_t}$, used to fit a predictive model, $f(\cdot)$.
+* **Labeled Set**: $\{(X_i, Y_i)\}_{i=1}^{n_l}$, smaller sample with true outcomes measured.
+* **Unlabeled Set**: $\{(X_i)\}_{i=n_l +1}^{n_l + n_u}$, only features available.
+
+After fitting $f$ on the training set, we apply it to the labeled and unlabeled sets to obtain predictions $f_i = f(X_i)$:
+
+<br/>
+
+![*Overview of setup for common 'inference with predicted data' problems*](images/ipd_overview.png){width=100%}
+
+<br/>
+
+Especially for 'good' predictions, it is tempting to treat $f_i$ in the labeled 
+and unlabeled sets as surrogate outcomes and use them to estimate quantities 
+such as regression parameters, $\beta$.  However, as we will see, this leads 
+to *invalid inference*. By combining the predicted $f_i$ with the observed 
+$Y_i$ in the labeled set, we can calibrate our estimates and standard errors 
+to achieve *valid inference*.
+
+## Key Formulas
+
+Consider a simple linear regression model for the association between $Y$ and 
+$X$. We discuss the following potential estimators, which we will later 
+implement using simulated data.
+
+### Naive Estimator
+
+Using only the *unlabeled* predictions, the **naive** OLS estimator solves
+
+$$
+\hat\gamma_{\text{naive}} = \arg\min_\gamma \sum_{i\in U} (f_i - X_i'\gamma)^2.
+$$
+
+We are careful to write the coefficients for this model as $\gamma$, because 
+they bear no necessary correspondence with $\beta$, except under the extremely 
+restrictive scenario when $f$ perfectly captures the true regression function.
+
+### Classical Estimator
+
+Instead, a valid approach would be to use only the *labeled* data. This 
+**classical** estimator solves
+
+$$
+\hat\beta_{\text{classical}} = \arg\min_\beta \sum_{i\in L} (Y_i - X_i'\beta)^2.
+$$
+While this approach is valid, it has limited precision because $n_l$ is small 
+in practice and we do not utilize any potential information from the (often
+much larger) **unlabeled** data.
+
+### IPD Estimators
+
+Many estimators tailored to inference with predicted data
+share a similar form, as given in 
+[Ji et al. (2025)](https://arxiv.org/pdf/2501.09731):
+
+$$
+\widehat\beta_\text{ipd} = \arg\min_\beta \frac{1}{n_l}\sum_{i=1}^{n_l} \ell(X_i, Y_i) - \left[\frac{1}{n_l}\sum_{i=1}^{n_l} g(X_i, f_i) - \frac{1}{n_l+n_u}\sum_{i=n_l+1}^{n_l+n_u} g(X_i, f_i)\right],
+$$
+
+for some loss function, $\ell(\cdot)$, such as the squared error loss for 
+linear regression, and some $g(\cdot)$, which they call the 'imputed loss'. 
+Here, the first term is exactly the **classical** estimator, which anchors 
+these methods on a valid model, and the second term in the square brackets 
+'augments' the estimator with additional information from the predictions. 
+This allows us to have an estimator that is provably unbiased and 
+asymptotically at least as efficient as the **classical** estimator, which 
+only uses a fraction of the data.
+
+The 
+[Inference with Predicted Data (IPD)](https://academic.oup.com/bioinformatics/article/41/2/btaf055/7997267) 
+package implements several recent methods for IPD, such as **Chen & Chen** 
+method of
+[Gronsbell et al.](https://arxiv.org/pdf/2411.19908), 
+the Prediction-Powered Inference (**PPI**) and **PPI++** methods of 
+[Angelopoulos et al. (a)](https://www.science.org/doi/10.1126/science.adi6000) 
+and 
+[Angelopoulos et al. (a)](https://arxiv.org/pdf/2311.01453), the 
+Post-Prediction Inference (**PostPI**) method of 
+[Wang et al.](https://www.pnas.org/doi/10.1073/pnas.2001238117), and the 
+Post-Prediction Adaptive Inference (**PSPA**) method of 
+[Miao et al.](https://arxiv.org/abs/2311.14220) 
+to conduct valid, efficient inference, even when a large proportion of outcomes 
 are predicted.  
 
-In this first tutorial, we demonstrate:
+In this first tutorial, we demonstrate how to:
 
-1. Generating fully synthetic data with `ipd::simdat()`.
-2. Fitting a simple linear prediction model (e.g., linear regression).
-3. Applying `ipd::ipd()` to estimate the slope, $\beta$, of $Y \mid X_1$ in the unlabeled set.
-4. Comparing **naive**, **classical**, and **IPD** estimates of $\beta$.
-5. Visualizing residuals and checking coverage.
+1. **Generate** fully synthetic data with `ipd::simdat()`.
+2. **Fit** a simple linear prediction model (e.g., linear regression).
+3. **Apply** `ipd::ipd()` to estimate the association, $\beta$, between $Y$ and $X$ using *labeled* and *unlabeled* data.
+4. **Compare** the **naive**, **classical**, and **IPD** estimates of $\beta$.
+5. **Visualize** these results.
 
 ## Installation and Setup
 
-Ensure you have the `ipd` package and some additional packages installed:
+First, insure you have the `ipd` package and some additional packages installed:
 
-```{r setup, class.source="fold-show"}
+```{r setup}
 # Install these packages if you have not already:
 # install.packages(c("ipd", "broom", "tidyverse", "patchwork"))
 
@@ -84,12 +168,13 @@ Below is a high-level summary of the core ``ipd`` functions.
 
 Generates synthetic datasets for various inferential models.
 
-```{r, class.source="fold-show", eval=FALSE}
+```{r, eval=FALSE}
 simdat(
-  n,       # Numeric vector of length 3: c(n_train, n_labeled, n_unlabeled)
-  effect,  # Numeric: true effect size for simulation
-  sigma_Y, # Numeric: residual standard deviation
-  model    # Character: one of "mean", "quantile", "ols", "logistic", "poisson"
+  n,        # Numeric vector of length 3: c(n_train, n_labeled, n_unlabeled)
+  effect,   # Numeric: true effect size for simulation
+  sigma_Y,  # Numeric: residual standard deviation
+  model,    # Character: one of "mean", "quantile", "ols", "logistic", "poisson"
+  ...       # Additional arguments
 )
 ```
 This function returns a data.frame with columns:
@@ -103,7 +188,7 @@ This function returns a data.frame with columns:
 
 Fits IPD methods for downstream inference on predicted data.
 
-```{r, class.source="fold-show", eval=FALSE}
+```{r, eval=FALSE}
 ipd(
   formula,      # A formula: e.g., Y - f ~ X1 + X2 + ...
   method,       # Character: one of "chen", "postpi_boot", "postpi_analytic", 
@@ -140,18 +225,19 @@ The `ipd::simdat()` function makes it easy to generate:
 
 * A **training set** (where you fit your prediction model),
 * A **labeled set** (where you observe the true $Y$),
-* An **unlabeled set** (where $Y$ is *presumed missing* but you compute predictions $\hat{Y}$).
+* An **unlabeled set** (where $Y$ is *presumed missing* but you compute predictions $f$).
 
-We supply `n = c(n_train, n_label, n_unlabel)`, an effect size (`effect`), 
-residual standard deviation (`sigma_Y`), and a model type (`"ols"`, 
-`"logistic"`, etc.). In this tutorial, we focus on a linear outcome. We can 
-also optionally shift and scale the predictions (via the `shift` and `scale`
-arguments) to control how the predicted outcomes relate to their true 
-underlying counterparts.
+We supply the sample sizes, `n = c(n_train, n_label, n_unlabel)`, an effect 
+size (`effect`), residual standard deviation (`sigma_Y`; i.e., how much random
+noise is in the data), and a model type (`"ols"`, `"logistic"`, etc.). In this 
+tutorial, we focus on a continuous outcome generated from a linear regression
+model (`"ols"`). We can also optionally shift and scale the predictions (via 
+the `shift` and `scale` arguments) to control how the predicted outcomes relate 
+to their true underlying counterparts.
 
 ### Exercise 1: Data Generation
 
-Let us generate a synthetic dataset for an OLS model with:
+Let us generate a synthetic dataset for a linear model with:
 
 * 5,000 training observations
 * 500 labeled observations
@@ -162,15 +248,10 @@ Let us generate a synthetic dataset for an OLS model with:
 
 > **Note:** Interactive exercises are provided below. Try **writing your code** in the first chunk; **solutions** are hidden in the second chunk.
 
-```{r, class.source="fold-show", eval=FALSE}
-set.seed(123)
-# Your code here
-# dat <- simdat(...)
-```
-
 ```{r}
 set.seed(123)
-# n_train = 5000, n_labeled = 500, n_unlabeled = 1500
+
+# n_t = 5000, n_l = 500, n_u = 1500
 n <- c(5000, 500, 1500)
 
 # Effect size = 1.5, noise sd = 3, model = "ols" (ordinary least squares)
@@ -185,7 +266,7 @@ dat <- simdat(
 )
 ```
 
-```{r, class.source="fold-show"}
+```{r}
 # The resulting data.frame `dat` has columns:
 #  - X1, X2, X3, X4: Four simulated covariates (all numeric ~ N(0,1))
 #  - Y             : True outcome (available in unlabeled set for simulation)
@@ -200,26 +281,37 @@ dat |>
 
 Let us inspect the first few rows of each subset:
 
-```{r, class.source="fold-show"}
-head(dat[dat$set_label == "training", ])
-head(dat[dat$set_label == "labeled", ])
-head(dat[dat$set_label == "unlabeled", ])
+```{r}
+# Training set
+dat |>
+  filter(set_label == "training") |>
+  glimpse()
+
+# Labeled set
+dat |>
+  filter(set_label == "labeled") |>
+  glimpse()
+
+# Unlabeled set
+dat |>
+  filter(set_label == "unlabeled") |>
+  glimpse()
 ```
 
 > **Explanation:**
 >
 > * Rows where `set_label == "training"` form an internal training set.  Here, `Y` is observed, but `f` is `NA`, as we learn the prediction rule in this set.
-> * Rows where `set_label == "labeled"` also have both `Y` and `f`.  In practice, 'f' will be generated by your own prediction model; for simulation, `simdat` does so automatically.
-> * Rows where `set_label == "unlabeled"` have `Y` for posterity (but in a real‐data scenario, you would not know `Y`); `simdat` still places a placeholder in `Y`, but IPD routines will not use these.  The column `f` always contains 'predicted' values.
+> * Rows where `set_label == "labeled"` also have both `Y` and `f`.  In practice, `f` will be generated by your own prediction model; for simulation, `simdat` does so automatically.
+> * Rows where `set_label == "unlabeled"` have `Y` for posterity (but in a real‐data scenario, you would not know `Y`); `simdat` still generates `Y`, but the IPD routines will not use these. The column `f` always contains 'predicted' values.
 
-## Fit a Naive Linear Prediction Model
+## Fit a Linear Prediction Model
 
-In a real application, we would take the **training** portion and fit an AI/ML 
-model to predict $Y$ from `(X1, X2, X3, X4)`. This is done automatically by the
-`simdat` function, but for demonstration, we will fit a 
-*linear regression model* on the training data:
+In practice, we would take the **training** portion and fit an AI/ML model to 
+predict $Y$ from $(X_1, X_2, X_3, X_4)$. This is done automatically by the
+`simdat` function, but for demonstration, let us fit a 
+*linear prediction model* on the training data:
 
-```{r, class.source="fold-show"}
+```{r}
 # 1) Subset training set
 dat_train <- dat |> 
   filter(set_label == "training")
@@ -243,13 +335,13 @@ dat$f_pred[idx_analytic] <- pred_vals
 dat |> 
   select(set_label, Y, f, f_pred) |> 
   filter(set_label != "training") |>
-  head()
+  glimpse()
 ```
 
 > **Explanation of arguments:**
 >
 > * `lm(Y ~ X1 + X2 + X3 + X4, data = dat_train)` fits an ordinary least squares (OLS) regression on the training subset.
-> * `predict(lm_pred, newdata = .)` generates $\hat{Y}$ (stored as `f_pred`) for each row outside of the training set.
+> * `predict(lm_pred, newdata = .)` generates a new `f` (stored as `f_pred`) for each row outside of the training set.
 
 > **Note:** In real workflows, you might use random forests (`ranger::ranger()`), gradients (`xgboost::xgboost()`), or any other ML algorithm; the IPD methods only require that you supply a vector of predictions, `f`, in your data.
 
@@ -260,7 +352,7 @@ We now split the data into two subsets:
 * **labeled**: those rows where we retain the true `Y` (to be used for final inference alongside their predictions).
 * **unlabeled**: those rows where we **hide** the true `Y` (we pretend we do not observe them; `ipd` will still require the `f` + covariates).
 
-```{r, class.source="fold-show"}
+```{r}
 dat_ipd <- dat |>
   filter(set_label != "training") |>
   # Keep only the columns needed for downstream IPD
@@ -289,7 +381,7 @@ $Y$, in our analytic data by plotting:
 1. **Scatterplot** of $Y$ and $f$ vs. $X_1$  
 2. **Density plots** of $Y$ and $f$  
 
-```{r, class.source="fold-show"}
+```{r, out.width="100%", dpi=300}
 # Prepare data
 dat_visualize <- dat_ipd |> 
   select(X1, Y, f) |>
@@ -298,30 +390,30 @@ dat_visualize <- dat_ipd |>
 
 # Scatter + trend lines
 ggplot(dat_visualize, aes(x = X1, y = Value, color = Measure)) +
+  theme_minimal() +
   geom_point(alpha = 0.4) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_color_manual(values = c("steelblue", "gray")) +
   labs(
     x     = "X1",
     y     = "True Y or Predicted f",
-    color = "Measure",
-    title = "Scatterplot of True Outcome vs Prediction\nby Covariate X1"
+    color = "Measure"
   ) +
-  theme_minimal()
+  theme(legend.position = "bottom") 
 ```
 
-```{r, class.source="fold-show"}
+```{r, out.width="100%", dpi=300}
 # Density plots
 ggplot(dat_visualize, aes(x = Value, fill = Measure)) +
+  theme_minimal() +
   geom_density(alpha = 0.4) +
   scale_fill_manual(values = c("steelblue", "gray")) +
   labs(
     x     = "Value",
     y     = "Density",
-    fill  = "Measure",
-    title = "Density of True Y vs Predicted f\n(showing reduced variance of predictions)"
+    fill  = "Measure"
   ) +
-  theme_minimal()
+  theme(legend.position = "bottom")
 ```
 
 > **Interpretation:**
@@ -334,8 +426,8 @@ ggplot(dat_visualize, aes(x = Value, fill = Measure)) +
 
 Before applying IPD, let's see what happens if we:
 
-1. Regress *only the 'unlabeled'* predicted `f` on `X1` (the 'naive' approach).
-2. Regress *only the 'labeled'* true `Y` on `X1` (the 'classical' approach).
+1. Regress the *unlabeled* predicted `f` on `X1` (the **naive** approach).
+2. Regress only the *labeled* true `Y` on `X1` (the **classical** approach).
 
 We will compare these to IPD‐corrected estimates.
 
@@ -343,14 +435,8 @@ We will compare these to IPD‐corrected estimates.
 
 Using the `labeled` and `unlabeled` sets, fit two models:
 
-1. **Naive OLS** on the unlabeled set using `lm()` with `f ~ X1`.
-2. **Classical OLS** on the labeled set using `lm()` with `Y ~ X1`.
-
-```{r, class.source="fold-show", eval=FALSE}
-# Your code here
-# naive_model <- lm(...)
-# classical_model <- lm(...)
-```
+1. **Naive OLS** on the *unlabeled* set using `lm()` with `f ~ X1`.
+2. **Classical OLS** on the *labeled* set using `lm()` with `Y ~ X1`.
 
 ```{r}
 # 1) Naive: treat f as if it were truth (only on unlabeled)
@@ -360,40 +446,38 @@ naive_model <- lm(f ~ X1, data = filter(dat_ipd, set_label == "unlabeled"))
 classical_model <- lm(Y ~ X1, data = filter(dat_ipd, set_label == "labeled"))
 ```
 
-Let's also extract the coefficient summaries and compare the results
+Let's also extract the coefficient summaries using `tidy` and compare the 
+results of the two approaches:
 
-```{r, class.source="fold-show"}
+```{r}
 naive_df <- tidy(naive_model) |>
+  mutate(method = "Naive") |>
   filter(term == "X1") |>
-  select(estimate, std.error)
+  select(method, estimate, std.error) 
 
 classical_df <- tidy(classical_model) |>
+  mutate(method = "Classical") |>
   filter(term == "X1") |>
-  select(estimate, std.error)
+  select(method, estimate, std.error)
 
-tibble(
-  Method       = c("Naive", "Classical"),
-  Estimate     = c(naive_df$estimate,  classical_df$estimate),
-  `Std. Error` = c(naive_df$std.error, classical_df$std.error)
-)
-
+bind_rows(naive_df, classical_df)
 ```
 
 > **Expected behavior (interpretation):**
 >
-> * The **naive** coefficient will typically be *attenuated* or *biased* toward zero if prediction is imperfect.
-> * The **classical** coefficient (only 500 labeled pts) is unbiased but has large standard error due to smaller sample size.
+> * The **naive** coefficient is *attenuated*, or *biased* toward zero, since the predictions are imperfect.
+> * The **classical** coefficient is unbiased but has a larger standard error due to the smaller sample size.
 
 ## IPD: Corrected Inference with `ipd::ipd()`
 
 The single wrapper function `ipd()` implements multiple IPD methods (e.g., 
 **Chen & Chen**, **PostPI**, **PPI**, **PPI++**, **PSPA**) for various
 inferential tasks (e.g., **mean** and **quantile** estimation, **ols**, 
-**logistic**, and **poisson** regression under the hood.  
+**logistic**, and **poisson** regression).  
 
-> **Basic usage of `ipd()`:**
+> **Reminder:** Basic usage of `ipd()`:
 >
-> ```{r, class.source="fold-show", eval=FALSE} 
+> ```{r, eval=FALSE} 
 > ipd(
 >   formula = Y - f ~ X1,     # The downstream inferential model
 >   method  = "pspa"          # The IPD method to run 
@@ -407,38 +491,33 @@ inferential tasks (e.g., **mean** and **quantile** estimation, **ols**,
 > )
 > ```
 
-### Exercise 3: IPD Model Fitting via the Chen & Chen Estimator
+### Exercise 3: IPD Model Fitting via the PSPA Estimator
 
-Let us run one method, `chen` (the 'Chen & Chen' estimator proposed by 
-[Gronsbell et al., 2025](https://arxiv.org/pdf/2411.19908)). The Chen & Chen 
+Let's run one method, `pspa`, proposed by [Miao et al., 2024](https://arxiv.org/pdf/2311.14220). The **PSPA** 
 estimator is an IPD method that combines information from:
 
 1. **Labeled data** (where the true outcome, $Y$, and model predictions, $f$, are available), and  
 2. **Unlabeled data** (where only model predictions, $f$, are available).
 
-Rather than treating every unlabeled observation equally, it applies a 
-**data-driven weight**, $\hat{W}^{\rm CC}$, to the unlabeled contribution and obtains
+Rather than treating the predicted outcomes with importance as the true 
+outcomes, the method estimates a **data-driven weight**, $\hat{\omega}$, 
+and applies it to the predicted outcome contributions:
 
 $$
-\hat{\beta}^{\rm CC} = \hat{\beta}^{\rm lab} - \hat{W}^{\rm CC}(\hat{\gamma}^{\rm lab} - \hat{\gamma}^{\rm all})
+\hat{\beta}_{\rm pspa} = \hat{\beta}_{\rm classical} - \hat{\omega}\cdot (\hat{\gamma}_{\rm naive}^l - \hat{\gamma}_{\rm naive}^u),
 $$
 
-where $\hat{\beta}^{\rm lab}$ is the slope estimate from the classical 
-regression, $\hat{\gamma}^{\rm lab}$ is the slope estimate from the naive
-regression in the labeled data, $\hat{\gamma}^{\rm all}$ is the slope estimate
-from the naive regression in the labeled + unlabeled data, and 
-$\hat{W}^{\rm CC}$ reflects amound of additional information carried by the
-predictions. By adaptively weighting the unlabeled information, the Chen & Chen estimator achieves greater precision than using labeled data alone, without 
-sacrificing validity, even when the predictions are imperfect.  
+where $\hat{\beta}_{\rm classical}$ is the estimate from the **classical** 
+regression, $\hat{\gamma}_{\rm naive}^l$ is the estimate from the **naive**
+regression in the *labeled* data, $\hat{\gamma}_{\rm naive}^u$ is the estimate
+from the **naive** regression in the *unlabeled* data, and 
+$\hat{\omega}$ reflects the amount of additional information carried by the
+predictions. By adaptively weighting the unlabeled information, the **PSPA**
+estimator achieves greater precision than by using the labeled data alone, 
+without sacrificing validity, even when the predictions are imperfect.  
 
 Let's call the method using the `ipd()` function and collect the estimate for 
 the slope of `X1` in a linear regression (`model = "ols"`):
-
-```{r, class.source="fold-show", eval=FALSE}
-set.seed(123)
-# Your code here
-# ipd_model <- ipd(...)
-```
 
 ```{r}
 set.seed(123)
@@ -453,45 +532,37 @@ ipd_model <- ipd(
 ipd_model
 ```
 
-The `ipd_model` is an S4 object with slots for things like the coefficient, se, 
+The `ipd_model` is an `S4` object with slots for things like the coefficient, se, 
 ci, coefTable, fit, formula, data_l, data_u, method, model, and intercept. We 
 can extract the coefficient table using `ipd`'s `tidy` helper and compare with
 the naive and classical methods:
 
-```{r, class.source="fold-show"}
+```{r}
 # Extract the coefficient estimates
 ipd_df <- tidy(ipd_model) |>
+  mutate(method = "IPD") |>
   filter(term == "X1") |>
-  select(estimate, std.error)
+  select(method, estimate, std.error)
 
 # Combine with naive & classical:
-compare_tab <- tibble(
-  Method       = c("Naive", "Classical", "IPD"),
-  Estimate     = c(naive_df$estimate,  classical_df$estimate,  ipd_df$estimate),
-  `Std. Error` = c(naive_df$std.error, classical_df$std.error, ipd_df$std.error)
-)
-
+compare_tab <- bind_rows(naive_df, classical_df, ipd_df)
 compare_tab
 ```
 
 ### Exercise 4: Visualizing Uncertainty
 
-Plot the coefficient estimates and 95% CIs for methods: naive, classical, and IPD.
-
-```{r, class.source="fold-show", eval=FALSE}
-# Your code: collect tidy outputs and plot
-```
+Let's plot the coefficient estimates and 95% CIs for each of the naive, classical, and IPD methods:
 
 ```{r, fig.width=6, fig.height=3}
 # Forest plot of estimates and 95% confidence intervals
 compare_tab |>
   mutate(
-    Lower = Estimate - 1.96 * `Std. Error`,
-    Upper = Estimate + 1.96 * `Std. Error`
+    lower = estimate - 1.96 * std.error,
+    upper = estimate + 1.96 * std.error
   ) |>
-  ggplot(aes(x = Estimate, y = Method)) +
+  ggplot(aes(x = estimate, y = method)) +
     geom_point(size = 2) +
-    geom_errorbarh(aes(xmin = Lower, xmax = Upper), height = 0.2) +
+    geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2) +
     geom_vline(xintercept = 1.5, linetype = "dashed", color = "red") +
     labs(
       title = "Comparison of slope estimates \u00B1 1.96·SE",
@@ -512,14 +583,10 @@ compare_tab |>
 Use `tidy()`, `glance()`, and `augment()` on `ipd_model`. Compare the 
 coefficient estimate and standard error for `X1` with the naive fit.
 
-```{r, class.source="fold-show", eval=FALSE}
-# Your code here
-```
-
 ```{r}
 tidy(ipd_model)
 glance(ipd_model)
-head(augment(ipd_model))
+augment(ipd_model) |> glimpse()
 
 # Compare with naive
 broom::tidy(naive_model)
@@ -534,10 +601,14 @@ broom::tidy(naive_model)
 
 ## Further Exploration
 
-* Try the **PPI++** (`"ppi_plusplus"`) and **PSPA** methods (`"pspa"`). How are they similar? How do they differ?
+* Try other methods such as **PPI++** (`"ppi_plusplus"`). How do the results compare?
 * Repeat the analysis for a **logistic** model by setting `model = "logistic"` in both `simdat()` and `ipd()`.
 
 Happy coding! Feel free to modify and extend these exercises for your own data.
+
+## References
+
+* Salerno, Stephen, et al. "ipd: An R Package for Conducting Inference on Predicted Data." *Bioinformatics* (2025): btaf055.
 
 ---
 

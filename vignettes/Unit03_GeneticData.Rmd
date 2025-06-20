@@ -1,11 +1,11 @@
 ---
 title: "Unit 03: BCR-ABL Fusion in B-Cell Leukemia"
-author: Stephen Salerno
+author: "Stephen Salerno"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
-output:
-rmarkdown::html_vignette:
-  toc: true
-  toc_depth: 2
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Unit 03: BCR-ABL Fusion in B-Cell Leukemia}
   %\VignetteEngine{knitr::rmarkdown}
@@ -46,6 +46,12 @@ tyrosine kinase. This fusion was historically associated with poor outcomes,
 until the advent of targeted therapies (e.g., imatinib) revolutionized 
 treatment and survival.
 
+<br/>
+
+![*Source: https://www.cancer.gov/publications/dictionaries/cancer-terms/def/philadelphia-chromosome*](images/bcrabl1_overview.jpg){width=100%}
+
+<br/>
+
 High-density microarray profiling measures expression of over 7,000 genes 
 in leukemic blast cells, enabling a form of "molecular diagnostics" where 
 supervised learning can:
@@ -83,7 +89,7 @@ missing gold-standard labels.
 >
 https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html
 
-## 1 Datasets Overview
+## Datasets Overview
 
 We work with two public [Bioconductor](https://www.bioconductor.org/) datasets:
 
@@ -93,11 +99,11 @@ We work with two public [Bioconductor](https://www.bioconductor.org/) datasets:
 We will train our classifiers on a subset of the `ALL` data, test the model on 
 the holdout `ALL` data, and perform IPD on the holdout `ALL` and `Golub` data.
 
-## 2 Phenotype Reduction and Feature Filtering
+## Phenotype Reduction and Feature Filtering
 
 We first narrow to B-cell ALL samples and reduce dimensionality by keeping the 500 most variable probes.
 
-```{r phenotype-filtering}
+```{r}
 # Load the ALL data
 data(ALL)
 
@@ -123,14 +129,18 @@ dat_filt <- fus[top500, ]
 dim(exprs(dat_filt))
 ```
 
-> We now have `dat_filt`, a filtered ALL dataset focused on B-cell lineage and the most informative probes.
+> **Explanation:**
+>
+> * `mad()` is robust to outliers and captures variability.
+> * Filtering saves time on downstream analysis without losing key signals.
+> * We now have `dat_filt`, a filtered ALL dataset focused on B-cell lineage and the most informative probes.
 
-## 3 Cross-Platform Probe Harmonization
+## Cross-Platform Probe Harmonization
 
 To predict on the `Golub` data, which uses a different array, we map probes 
 from each platform to gene symbols, then intersect to find a common gene set.
 
-```{r harmonize}
+```{r}
 # Load the Golub data
 data(Golub_Merge)
 
@@ -141,7 +151,8 @@ gmap_all <- AnnotationDbi::select(
   columns = c("PROBEID","SYMBOL"),
   keytype = "PROBEID"
 )
-# 3.2 Map HGU6800 probes (Golub) to gene symbols
+
+# HGU6800 probes (Golub) to gene symbols
 gmap_golub <- AnnotationDbi::select(
   hu6800.db,
   keys    = featureNames(Golub_Merge),
@@ -149,19 +160,29 @@ gmap_golub <- AnnotationDbi::select(
   keytype = "PROBEID"
 )
 
-# 3.3 Identify common symbols
+# Identify common symbols
 common_sym <- intersect(gmap_all$SYMBOL, gmap_golub$SYMBOL)
 
-# 3.4 For each symbol, pick the first associated probe
-probe_all   <- gmap_all   %>% filter(SYMBOL %in% common_sym) %>% group_by(SYMBOL) %>% dplyr::slice(1) |> drop_na()
-probe_golub <- gmap_golub %>% filter(SYMBOL %in% common_sym) %>% group_by(SYMBOL) %>% dplyr::slice(1) |> drop_na()
+# For each symbol, pick the first associated probe
+probe_all <- gmap_all |> 
+  filter(SYMBOL %in% common_sym) |> 
+  group_by(SYMBOL) |> 
+  dplyr::slice(1) |> 
+  drop_na()
 
-# 3.5 Subset ExpressionSets to these probes
+probe_golub <- gmap_golub |> 
+  filter(SYMBOL %in% common_sym) |> 
+  group_by(SYMBOL) |> 
+  dplyr::slice(1) |> 
+  drop_na()
+
+# Subset ExpressionSets to these probes
 dat_train  <- dat_filt[probe_all$PROBEID, ]
 eset_golub <- Golub_Merge[probe_golub$PROBEID, ]
 
-# 3.6 Further subset Golub to B-cell ALL samples
-golub_bALL <- eset_golub[, pData(eset_golub)$T.B.cell == "B-cell" & pData(eset_golub)$ALL.AML == "ALL"]
+# urther subset Golub to B-cell ALL samples
+golub_bALL <- eset_golub[, pData(eset_golub)$T.B.cell == "B-cell" &
+                           pData(eset_golub)$ALL.AML  == "ALL"]
 
 featureNames(dat_train) <- probe_all$SYMBOL
 rownames(exprs(dat_train)) <- probe_all$SYMBOL
@@ -177,13 +198,48 @@ dim(golub_bALL)   # features x Golub B-cell ALL samples
 
 > `dat_train` and `golub_BALL` now share the same gene-symbol feature set, ready for model training and transfer.
 
----
+## Exploratory Data Analysis
 
-## 4 Train/Test Split & Classifier Training
+With our filtered training set (`dat_train`), we explore patterns using a 
+heatmap and principal component analysis (PCA).
+
+```{r, fig.height=6, fig.width=6, out.width="100%", dpi=300}
+# Set subtype colors for visualization
+fcol <- ifelse(dat_train$mol.biol == "NEG", "gray", "steelblue")
+
+heatmap(exprs(dat_train), ColSideColors = fcol)
+```
+
+```{r, fig.height=3, fig.width=6, out.width="100%", dpi=300}
+# PCA on samples
+PCg <- prcomp(t(exprs(dat_train)))
+
+# Scree plot
+plot(PCg)
+```
+
+```{r, fig.height=6, fig.width=6, out.width="100%", dpi=300}
+# Scatterplots of PCs
+pairs(PCg$x[, 1:5], col = fcol, pch = 19)
+```
+
+```{r, fig.height=6, fig.width=6, out.width="100%", dpi=300}
+# Biplot of PC1 vs PC2
+biplot(PCg) 
+```
+
+> **Interpretation:**
+>
+> * The heatmap reveals distinct blocks of probes whose expression differs between BCR-ABL1 fusion-positive and fusion-negative samples.
+> * The PCA scatter shows separation (or overlap) of samples by fusion status along the first two principal components, and to a lesser extent, the next three.
+> * In the biplot, probes lying far from the origin along PC1 or PC2 represent genes with the larges loadings, i.e., the greatest contribution to those principal components. Samples positioned similarly share expression patters in those genes.
+> * Overall, the modest separation in PCA indicates the need for supervised methods to pinpoint the genes most predictive of BCR-ABL1 status.
+
+## Train/Test Split and Classifier Training
 
 We split `dat_train` (ALL) into 60% training and 40% holdout, then train three ML models.
 
-```{r train-test}
+```{r}
 set.seed(2025)                # for reproducibility
 n_all <- ncol(dat_train)      # number of ALL samples
 train_idx <- sample(n_all, size = floor(0.6 * n_all))
@@ -192,37 +248,124 @@ train_eset <- dat_train[, train_idx]
 test_eset  <- dat_train[, -train_idx]
 ```
 
-```{r train-classifiers}
-# 4.1 Diagonal LDA (dldaI): assumes diagonal covariance for stability
-dlda_mod <- MLearn(mol.biol ~ ., train_eset, dldaI, 1:40)
-confuMat(dlda_mod)           # confusion matrix on training set
+In this section, we compare three supervised learning methods using the 
+[`MLInterfaces`](https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html) 
+framework:
 
-# 4.2 Neural Network (nnetI): single hidden layer size=5, decay=0.01
-nn_mod <- MLearn(mol.biol ~ ., train_eset, nnetI, 1:40, size=5, decay=0.01, MaxNWts=2000)
-confuMat(nn_mod)
+* **Diagonal Linear Discriminant Analysis (dldaI)**
+* **Neural Network (nnetI)**
+* **Random Forest (randomForestI)**
 
-# 4.3 Random Forest (randomForestI)
-rf_mod <- MLearn(mol.biol ~ ., train_eset, randomForestI, 1:40)
-confuMat(rf_mod) + confuMat(rf_mod, "train")
+We will use the `MLearn()` function, which wraps each algorithm, providing a 
+consistent interface to train, predict, and evaluate models on an 
+`ExpressionSet`. After fitting, we will use `confuMat()` to display the 
+confusion matrix, showing the true versus predicted class counts.
+
+We train each model on the first 40 most variable probes from the filtered 
+`ExpressionSet` (features `1:40` in `train_eset`).
+
+### Diagonal Linear Discriminant Analysis (`dldaI`)
+
+Diagonal LDA assumes each feature is conditionally independent (covariance 
+matrix is diagonal), which can improve stability in high-dimensional, 
+low-sample settings. We use the `dldaI` interface to fit and evaluate this 
+classifier.
+
+```{r}
+# Train Diagonal LDA on probes 1:40
+dlda_mod <- MLearn(
+  mol.biol ~ ., # mol.biol ~ . specifies BCR/ABL1 fusion status as the outcome
+  train_eset,   # Filtered ExpressionSet
+  dldaI,        # dldaI is the diagonal LDA interface
+  1:40          # 1:40 selects the first 40 probes
+)
+
+# Print a summary of the fitted model
+dlda_mod
+
+# Display the confusion matrix (true vs predicted)
+cm_dlda <- confuMat(dlda_mod)
+cm_dlda
+
+# Accuracy of Diagonal LDA
+acc_dlda <- sum(diag(cm_dlda)) / sum(cm_dlda)
+cat("Accuracy:", sprintf("%.2f%%", acc_dlda * 100))
 ```
 
-> Each confusion matrix shows true vs predicted counts on the **training** subset.  Accuracy around 75-85% reflects task difficulty.
+### Neural Network (`nnetI`)
 
----
+A single hidden layer neural network can capture non-linear relationships. We 
+use the `nnetI` interface with default parameters plus:
 
-## 5 Predictions on ALL Test and Golub
+* `size = 5`: number of hidden neurons
+
+* `decay = 0.01`: weight-decay regularization
+
+* `MaxNWts = 2000`: maximum allowed number of weights
+
+```{r}
+# Neural Network (nnetI)
+nn_mod <- MLearn(
+  mol.biol ~ ., 
+  train_eset, 
+  nnetI, 
+  1:40, 
+  size=5, 
+  decay=0.01, 
+  MaxNWts=2000
+)
+
+# Show model summary
+nn_mod
+
+# Confusion matrix for Neural Net
+cm_nn <- confuMat(nn_mod)
+cm_nn
+
+# Accuracy of Neural Net
+acc_nn <- sum(diag(cm_nn)) / sum(cm_nn)
+cat("Accuracy:", sprintf("%.2f%%", acc_nn * 100))
+```
+
+### Random Forest (`randomForestI`)
+
+Random forests build an ensemble of decision trees on bootstrapped samples and 
+random feature subsets, offering robust performance with little tuning. We use 
+the `randomForestI` to fit a random forest model: 
+
+```{r}
+# Random Forest (randomForestI)
+rf_mod <- MLearn(
+  mol.biol ~ ., 
+  train_eset, 
+  randomForestI, 
+  1:40
+)
+
+# Show model summary
+rf_mod
+
+# Confusion matrix
+cm_rf <- confuMat(rf_mod)
+cm_rf
+
+# Accuracy of Random Forest
+acc_rf <- sum(diag(cm_rf)) / sum(cm_rf)
+cat("Accuracy:", sprintf("%.2f%%", acc_rf * 100))
+```
+
+> **Interpretation:**
+> Only the Random Forest achieves perfect separation in the validation samples. This highlights the challenge of discriminating BCR-ABL1 status based solely on the top variable probes and underscores why downstream IPD corrections (for regression inference) remain valuable.
+
+## Predictions on ALL Test and Golub
 
 After fitting our classifiers on the **training** subset of ALL, we now generate predictions on both the **ALL holdout test** and the **Golub B-cell ALL** datasets.
 
-```{r predict-all-test}
-# 5.1 Prepare ALL test feature matrix
-# test_mat_all <- t(exprs(test_eset)[probe_all$PROBEID, ])
-# colnames(test_mat_all) <- probe_all$SYMBOL
-
-# 5.2 Predict BCR-ABL1 status on ALL test holdout using random forest
+```{r}
+# Predict BCR-ABL1 status on ALL test holdout using random forest
 all_pred <- MLInterfaces::predict.classifierOutput(rf_mod, test_eset)
 
-# 5.3 Compare to true labels in test_eset
+# Compare to true labels in test_eset
 conf_mat_test <- table(
   Truth    = test_eset$mol.biol,
   Predicted= all_pred$testPredictions
@@ -230,28 +373,22 @@ conf_mat_test <- table(
 conf_mat_test
 ```
 
-```{r predict-golub}
-# 5.4 Prepare Golub feature matrix (samples x genes)
-# golub_mat <- t(exprs(golub_BALL)[probe_golub$PROBEID, ])
-# colnames(golub_mat) <- probe_golub$SYMBOL
-
-# 5.5 Predict BCR-ABL1 status on Golub B-cell ALL
+```{r}
+# Predict BCR-ABL1 status on Golub B-cell ALL
 golub_pred <- MLInterfaces::predict.classifierOutput(rf_mod, golub_bALL)
 
-# 5.6 Summarize prediction counts (no ground truth in Golub)
+# Summarize prediction counts (no ground truth in Golub)
 table(golub_pred$testPredictions)
 ```
 
 > **Note:** We retain **true** labels in the ALL test set for later IPD; Golub remains **unlabeled**.
 
----
-
-## 6 IPD Inference on Sex Effect
+## IPD Inference on Sex Effect
 
 We will now use **Inference with Predicted Data (IPD)** to estimate the log-odds effect of **sex** (male vs female) on true BCR-ABL1 status, combining the holdout ALL data with true and predict fusion status (i.e., our labeled data) and the Golub data with the predicted fusion status (i.e., our unlabeled data)
 
-```{r ipd-setup}
-# 6.1 Build labeled (ALL test) data frame
+```{r}
+# Build labeled (ALL test) data frame
 df_test <- tibble(
   sample = colnames(test_eset),
   set    = "labeled",
@@ -260,7 +397,7 @@ df_test <- tibble(
   sex    = factor(pData(test_eset)$sex, levels = c("F","M"))
 )
 
-# 6.2 Build unlabeled (Golub) data frame
+# Build unlabeled (Golub) data frame
 df_golub <- tibble(
   sample = colnames(golub_bALL),
   set    = "unlabeled",
@@ -269,29 +406,58 @@ df_golub <- tibble(
   sex    = factor(pData(golub_bALL)$Gender, levels = c("F","M"))
 )
 
-# 6.3 Combine for IPD
+# Combine for IPD
 ipd_df <- bind_rows(df_test, df_golub) |> drop_na(sex)
 ```
 
-```{r ipd-run}
-glm(true ~ sex, "binomial", df_test)
+```{r, fig.height=4, fig.width=6, out.width="100%", dpi=300}
+# Classical regression
+class_fit <- glm(true ~ sex, "binomial", df_test)
+class_df  <- broom::tidy(class_fit) |>
+  mutate(method = "Classical")
 
-glm(pred ~ sex, "binomial", df_golub)
+# Naive regression
+naive_fit <- glm(pred ~ sex, "binomial", df_golub)
+naive_df  <- broom::tidy(naive_fit) |>
+  mutate(method = "Naive")
 
-# 6.4 Run IPD logistic regression: true ~ sex
-ires <- ipd(
+# IPD logistic regression
+ipd_fit <- ipd(
   formula   = true - pred ~ sex,
   method    = "pspa",
   model     = "logistic",
   data      = ipd_df,
   label     = "set",
 )
+ipd_df  <- tidy(ipd_fit) |>
+  mutate(method = "IPD")
 
-ires
+# Summarize coefficients
+combined <- bind_rows(class_df, naive_df, ipd_df) |>
+  mutate(term = recode(term, "sexM" = "Male (vs Female)"))
 
-# 6.5 Extract coefficient for sexM
-df_ipd <- tidy(ires)
-df_ipd
+# Forest plot
+ggplot(combined, aes(x = estimate, y = term, color = method)) +
+  geom_point(position = position_dodge(width = 0.6)) +
+  geom_errorbarh(aes(xmin = estimate - 1.96 * std.error,
+                     xmax = estimate + 1.96 * std.error),
+                 height = 0.2,
+                 position = position_dodge(width = 0.6)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values  = c("#1B365D", "#00C1D5", "#AA4AC4")) +
+  scale_color_manual(values = c("#1B365D", "#00C1D5", "#AA4AC4")) +
+  labs(
+    x = "Log-Odds Estimate (95% CI)",
+    y = "Covariate",
+    title = "Comparison of BCR-ABL1 Model Coefficients",
+    color = "Model Type"
+  ) +
+  theme_minimal()
 ```
 
 > **Insight:** By treating the ALL test set as labeled and Golub as unlabeled, IPD  combines information across cohorts to correct bias and improve precision when estimating the association between BCR-ABL1 status and patient sex.
+
+---
+
+*This is the end of the module. We hope this was informative! For question/concerns/suggestions, please reach out to ssalerno@fredhutch.org*
