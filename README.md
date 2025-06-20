@@ -1,4 +1,4 @@
-# Inference with Predicted Data (IPD) Workshop <a href="https://salernos.github.io/ipdworkshop"><img src="man/figures/logo.png" align="right" height="120" alt="ipdworkshop website" /></a>
+# Inference with Predicted Data (IPD) Workshop
 
 > What do we do after we have machine learned everything?
 
