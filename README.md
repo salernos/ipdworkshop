@@ -1,6 +1,4 @@
-# Inference with Predicted Data (IPD) Workshop
-
-## <img src="vignettes/images/ipd.png" align="right" height="200" style="float:right; height:200px;"/>
+# Inference with Predicted Data (IPD) Workshop <a href="https://salernos.github.io/ipdworkshop"><img src="man/figures/logo.png" align="right" height="120" alt="ipdworkshop website" /></a>
 
 > What do we do after we have machine learned everything?
 
