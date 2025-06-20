@@ -1,7 +1,7 @@
 ---
 title: "Unit 02: Different Measures of Adiposity"
 author: "Stephen Salerno"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
+date: "June 24, 2025"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -522,7 +522,7 @@ naive_wc_df  <- broom::tidy(naive_wc_fit) |>
 
 > **Interpretation:**
 >
-> -   Because we 'predicted' obesity using BMI or WC, the "naive" coefficient are ...
+> -   Because we 'predicted' obesity using BMI or WC, the "naive" coefficient are biased and the confidence intervals are artifically too narrow.
 
 For the classical approach, we fit the true model on the **labeled** subset (with actual DXA % fat). That is:
 

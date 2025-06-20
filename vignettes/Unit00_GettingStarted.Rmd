@@ -1,7 +1,7 @@
 ---
 title: "Unit 00: Getting Started"
 author: "Stephen Salerno"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
+date: "June 24, 2025"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -208,7 +208,7 @@ ipd(
 * **postpi_analytic**: analytic post-prediction inference ([Wang et al., 2020](https://www.pnas.org/doi/10.1073/pnas.2001238117)).
 * **postpi_boot**: bootstrap post-prediction inference [Wang et al., 2020](https://www.pnas.org/doi/10.1073/pnas.2001238117)).
 * **ppi**: prediction-powered inference ([Angelopoulos et al., 2023](https://www.science.org/doi/10.1126/science.adi6000))
-* **ppi_pluspus**: PPI++ (PPI with data-driven weighting; [Angelopoulos et al., 2024](https://arxiv.org/pdf/2311.01453))
+* **ppi_plusplus**: PPI++ (PPI with data-driven weighting; [Angelopoulos et al., 2024](https://arxiv.org/pdf/2311.01453))
 * **ppi_a**: PPI using all data ([Gronsbell et al., 2025](https://arxiv.org/pdf/2411.19908))
 * **pspa**: assumption-lean and data-adaptive post-prediction inference ([Miao et al., 2024](https://arxiv.org/pdf/2311.14220))
 

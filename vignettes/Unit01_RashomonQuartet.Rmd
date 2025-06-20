@@ -1,13 +1,13 @@
 ---
-title: "Unit 01: The Rashoman Quartet"
+title: "Unit 01: The Rashomon Quartet"
 author: "Stephen Salerno"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
+date: "June 24, 2025"
 output: 
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Unit 01: The Rashoman Quartet}
+  %\VignetteIndexEntry{Unit 01: The Rashomon Quartet}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -36,12 +36,12 @@ we will:
 3. **Demonstrate** how the **naive**, **classical**, and **IPD**-based *inference* results differ.
 
 >
-> **Note:** We will replicate the results of the Rashoman Quartet analysis following:
+> **Note:** We will replicate the results of the Rashomon Quartet analysis following:
 >
 > https://github.com/MI2DataLab/rashomon-quartet
 >
 
-## Background on the Rashoman Quartet
+## Background on the Rashomon Quartet
 
 The underlying datasets are synthetically generated to include three covariates, 
 $\boldsymbol{X} = (X_1, X_2, X_3)^\top$, so that
@@ -62,7 +62,7 @@ $$
 
 Two independent batches of 1,000 observations (a *training* set and a 
 *testing* set) are generated under this model. We will fit the four candidate 
-models on the 1,000-row *training* data, and evaluated on them separately on the
+models on the 1,000-row *training* data, and evaluate them separately on the
 1,000-row *testing* data. As we will show, all four achieve $R^2 \approx 0.729$ 
 and $\mathrm{RMSE} \approx 0.354$ on the *testing* set. However, their 
 interpretations diverge:
@@ -72,7 +72,7 @@ interpretations diverge:
 * **Random forest** produces a smooth ensemble derivative of the tree.
 * **Neural network** learns a different nonlinear basis with hidden units.
 
-![*Source: https://github.com/MI2DataLab/rashomon-quartet*](images/rashoman_overview.png){width=100%}
+![*Source: https://github.com/MI2DataLab/rashomon-quartet*](images/Rashomon_overview.png){width=100%}
 
 In addition to comparing interpretability across models, we will demonstrate 
 how to perform valid downstream inference for $Y$ on $\boldsymbol{X}$ when $Y$ 

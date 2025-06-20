@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Unit 03: Classifying BCR-ABL Fusion in B-Cell Leukemia • ipdworkshop</title>
+<title>Unit 03: BCR-ABL Fusion in B-Cell Leukemia • ipdworkshop</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Unit 03: Classifying BCR-ABL Fusion in B-Cell Leukemia">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Unit 03: BCR-ABL Fusion in B-Cell Leukemia">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,12 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/HOWTO_BUILD_WORKSHOP.html">How To Build A Workshop Package</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit00_GettingStarted.html">Unit 00: Getting Started</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit01_RashomanQuartet.html">Unit 01: The Rashoman Quartet</a></li>
+<li><a class="dropdown-item" href="../articles/Unit00_GettingStarted.html">Unit 00: Getting Started</a></li>
+    <li><a class="dropdown-item" href="../articles/Unit01_RashomonQuartet.html">Unit 01: The Rashomon Quartet</a></li>
     <li><a class="dropdown-item" href="../articles/Unit02_BMIvDXA.html">Unit 02: Different Measures of Adiposity</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit03_GeneticData.html">Unit 03: Classifying BCR-ABL Fusion in B-Cell Leukemia</a></li>
-    <li><a class="dropdown-item" href="../articles/workshop_example.html">An Example Workshop</a></li>
+    <li><a class="dropdown-item" href="../articles/Unit03_GeneticData.html">Unit 03: BCR-ABL Fusion in B-Cell Leukemia</a></li>
   </ul>
 </li>
       </ul>
@@ -57,11 +55,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Unit 03: Classifying BCR-ABL Fusion in B-Cell Leukemia</h1>
+      <h1>Unit 03: BCR-ABL Fusion in B-Cell Leukemia</h1>
                         <h4 data-toc-skip class="author">Stephen
 Salerno</h4>
             
-            <h4 data-toc-skip class="date">2025-06-17</h4>
+            <h4 data-toc-skip class="date">June 24, 2025</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/salernos/ipdworkshop/blob/HEAD/vignettes/Unit03_GeneticData.Rmd" class="external-link"><code>vignettes/Unit03_GeneticData.Rmd</code></a></small>
       <div class="d-none name"><code>Unit03_GeneticData.Rmd</code></div>
@@ -69,944 +67,565 @@ Salerno</h4>
 
     
     
-<div class="section level3">
-<h3 id="background-and-motivation">Background and Motivation<a class="anchor" aria-label="anchor" href="#background-and-motivation"></a>
-</h3>
+<div class="section level2">
+<h2 id="background-motivation">Background &amp; Motivation<a class="anchor" aria-label="anchor" href="#background-motivation"></a>
+</h2>
 <p>Acute lymphoblastic leukemia (ALL) is the most common childhood
-cancer and exhibits marked genetic heterogeneity. Different chromosomal
-translocations, such as <strong>BCR-ABL1</strong> (the Philadelphia
-chromosome), define distinct molecular subtypes with unique prognoses
-and therapeutic responses. The BCR-ABL1 fusion arises from a t(9;22)
-translocation that generates a constitutively active tyrosine kinase,
-historically associated with poor outcome until the advent of targeted
-inhibitors (e.g. imatinib).</p>
-<p>High-density microarray profiling measures expression of &gt;7,000
-genes in leukemia blasts, enabling supervised learning of genetic
-subtypes directly from transcriptomic signatures. This “molecular
-diagnostics” approach can:</p>
+cancer, but it exhibits marked genetic heterogeneity, with distinct
+chromosomal translocations defining molecular subtypes with divergent
+prognoses and therapeutic responses. In B-cell lineage ALL, the
+<strong>BCR-ABL1</strong> fusion (“breakpoint cluster region”/“Abelson”,
+i.e., the “Philadelphia chromosome”) arises from a t(9;22) translocation
+and encodes a constitutively active tyrosine kinase. This fusion was
+historically associated with poor outcomes, until the advent of targeted
+therapies (e.g., imatinib) revolutionized treatment and survival.</p>
+<p><br></p>
+<div class="float">
+<img src="images/bcrabl1_overview.jpg" style="width:100.0%" alt="Source: https://www.cancer.gov/publications/dictionaries/cancer-terms/def/philadelphia-chromosome"><div class="figcaption"><em>Source: <a href="https://www.cancer.gov/publications/dictionaries/cancer-terms/def/philadelphia-chromosome" class="external-link uri">https://www.cancer.gov/publications/dictionaries/cancer-terms/def/philadelphia-chromosome</a></em></div>
+</div>
+<p><br></p>
+<p>High-density microarray profiling measures expression of over 7,000
+genes in leukemic blast cells, enabling a form of “molecular
+diagnostics” where supervised learning can:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Classify</strong> fusion status or other subtypes when
-cytogenetic assays are unavailable.<br>
-</li>
+<strong>Classify</strong> fusion status or other genetic subtypes
+when cytogenetic assays (PCR, FISH) are unavailable.</li>
 <li>
-<strong>Discover</strong> novel gene markers and pathways associated
-with each subtype.<br>
-</li>
+<strong>Discover</strong> novel marker genes and pathways
+dysregulated by specific fusions.</li>
 <li>
 <strong>Predict</strong> therapeutic response and stratify risk
-based on expression-derived risk scores.</li>
+using expression-derived scores.</li>
 </ol>
-<p>However, in many retrospective or multi-center studies, only a subset
-of patients undergo rigorous fusion testing (e.g., RT-PCR for BCR-ABL1),
-leaving thousands of cases “unlabeled.” A common strategy is to train a
-classifier on the small labeled set and apply it to the larger unlabeled
-cohort. However, downstream analyses using predicted BCR-ABL1 status can
-be biased if one simply treats predicted labels as if they were ground
-truth.</p>
-<p><strong>Inference with Predicted Data (IPD)</strong> provides a
-principled framework to combine the small labeled set (true fusion
-status) with a large set of predicted labels (from gene-expression
-classifiers), correcting both estimation bias and underestimated
-uncertainty. In this module, we will:</p>
+<p>However, in many retrospective or multi-center cohorts, only a subset
+of patients undergo gold-standard fusion testing (e.g., RT-PCR for
+BCR-ABL1), leaving the majority “unlabeled.” A common workaround is to
+train a gene expression classifier on the small labeled subset and apply
+it to the larger unlabeled cohort. Yet, naive downstream analyses,
+treating predicted labels as ground truth, can yield biased effect
+estimates and understate uncertainty.</p>
+<p><a href="https://academic.oup.com/bioinformatics/article/41/2/btaf055/7997267" class="external-link"><strong>Inference
+with Predicted Data (IPD)</strong></a> offers a principled remedy: it
+combines a small labeled set with the predicted labels (e.g., with true
+fusion status) with a larger unlabeled set, adjusting both bias and
+variance. In this module, we will:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Load</strong> and preprocess the <code>ALL</code>
-Bioconductor dataset, defining a binary outcome for BCR-ABL1
-fusion.<br>
-</li>
+<strong>Describe</strong> the <a href="https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html" class="external-link"><code>ALL</code></a>
+and <a href="https://www.bioconductor.org/packages/release/data/experiment/manuals/golubEsets/man/golubEsets.pdf" class="external-link"><code>Golub</code></a>
+Bioconductor datasets.</li>
 <li>
-<strong>Split</strong> into labeled (fusion assayed) and unlabeled
-subsets.<br>
-</li>
+<strong>Subset</strong> the <code>ALL</code> data to B-cell ALL and
+filter to the top 500 variable probes.</li>
 <li>
-<strong>Train</strong> an expression-based classifier on the labeled
-set.<br>
-</li>
+<strong>Harmonize</strong> probes across platforms via gene
+symbols.</li>
 <li>
-<strong>Apply</strong> Naive- (proxy only), Classical- (true only),
-and IPD-based logistic regression to study the association of BCR-ABL1
-with patient age.<br>
-</li>
+<strong>Split</strong> the <code>ALL</code> data and train three
+classifiers for BCR-ABL1 fusion status.</li>
 <li>
-<strong>Demonstrate</strong> how IPD corrects bias when surrogate
-labels stand in for true molecular assays.</li>
+<strong>Predict</strong> on the holdout <code>ALL</code> and
+<code>Golub</code> B-cell ALL data using the <code>ALL</code>-trained
+classifier.</li>
+<li>
+<strong>Apply</strong> IPD to estimate the association between
+fusion status and patient sex assigned at birth.</li>
 </ol>
 <p>By the end, you will understand how to leverage expression-based
 predictions while maintaining valid inference on genetic subtypes in
 cohorts with partially missing gold-standard labels.</p>
-<p>For understanding the data and generating predictions, we will be
-following a wonderful Bioconductor <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html" class="external-link">vignette</a>
-by … and …</p>
-<div id="section" class="section level81">
-<p class="heading"></p>
-<p>Data of T- and B-cell Acute Lymphocytic Leukemia from the Ritz
-Laboratory at the DFCI</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h3>
-<div class="section level4">
-<h4 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
-</h4>
-<p>This module demonstrates how to build and evaluate classifiers that
-discriminate B-cell acute lymphoblastic leukemia (ALL) patients with the
-BCR-ABL fusion (Philadelphia chromosome) from those without, using
-microarray gene expression data. We will:</p>
-<ol style="list-style-type: decimal">
-<li>Subset the <code>ALL</code> dataset to B-cell lineage samples.</li>
-<li>Define a binary outcome <code>BT_bin = 1</code> for BCR-ABL+ vs 0
-otherwise.</li>
-<li>Split into training (70%) and test (30%) sets.</li>
-<li>Use <strong>MLInterfaces</strong> to train multiple classifiers
-(random forest, SVM, elastic net).</li>
-<li>Evaluate their performance (accuracy, AUC) on held-out samples.</li>
-<li>Compute variable importance and partial-dependence for the top
-model.</li>
-</ol>
-<p>Participants will follow along in RStudio and complete two brief
-exercises.</p>
-</div>
-<div class="section level4">
-<h4 id="pre-requisites">Pre-requisites<a class="anchor" aria-label="anchor" href="#pre-requisites"></a>
-</h4>
-<ul>
-<li>Basic R and tidyverse</li>
-<li>Familiarity with logistic classification (<code>glm</code>,
-<code>randomForest</code>)</li>
-<li>Installed packages: <code>ALL</code>, <code>MLInterfaces</code>,
-<code>genefilter</code>, <code>broom</code>, <code>ggplot2</code>
-</li>
-</ul>
-</div>
-<div class="section level4">
-<h4 id="participation">Participation<a class="anchor" aria-label="anchor" href="#participation"></a>
-</h4>
-<p>Instructor-led live demo; attendees run code and complete exercises
-independently.</p>
-</div>
-<div class="section level4">
-<h4 id="r-packages-used">
-<em>R</em> packages used<a class="anchor" aria-label="anchor" href="#r-packages-used"></a>
-</h4>
-<p><code>ALL</code>, <code>MLInterfaces</code>, <code>genefilter</code>,
-<code>broom</code>, <code>ggplot2</code>, <code>tidyverse</code></p>
-</div>
-<div class="section level4">
-<h4 id="time-outline">Time outline<a class="anchor" aria-label="anchor" href="#time-outline"></a>
-</h4>
-<table class="table">
-<thead><tr class="header">
-<th>Activity</th>
-<th>Time</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Load &amp; preprocess ALL (B-cells)</td>
-<td>5m</td>
-</tr>
-<tr class="even">
-<td>Train/test split &amp; model training</td>
-<td>10m</td>
-</tr>
-<tr class="odd">
-<td>Model evaluation (accuracy, AUC)</td>
-<td>10m</td>
-</tr>
-<tr class="even">
-<td>Exercise 1: alternative learners</td>
-<td>5m</td>
-</tr>
-<tr class="odd">
-<td>Variable importance &amp; PDP</td>
-<td>10m</td>
-</tr>
-<tr class="even">
-<td>Wrap-up &amp; discussion</td>
-<td>5m</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level4">
-<h4 id="learning-goals">Learning goals<a class="anchor" aria-label="anchor" href="#learning-goals"></a>
-</h4>
-<ul>
-<li>Understand how to classify molecular subtypes using expression
-arrays</li>
-<li>Gain experience with the MLInterfaces framework</li>
-<li>Learn to interpret model performance metrics</li>
-</ul>
-</div>
-<div class="section level4">
-<h4 id="learning-objectives">Learning objectives<a class="anchor" aria-label="anchor" href="#learning-objectives"></a>
-</h4>
-<p>By the end, participants will be able to:</p>
-<ol style="list-style-type: decimal">
-<li>Subset an <code>ExpressionSet</code> by phenotype and define a
-binary outcome.</li>
-<li>Train and compare multiple classifiers using
-<code>trainML</code>.</li>
-<li>Compute and interpret accuracy, AUC, and confusion matrices.</li>
-<li>Extract variable importance and partial-dependence for a chosen
-model.</li>
-</ol>
-<hr>
-</div>
-</div>
-<div class="section level3">
-<h3 id="load-preprocess-the-all-dataset">1 Load &amp; Preprocess the ALL Dataset<a class="anchor" aria-label="anchor" href="#load-preprocess-the-all-dataset"></a>
-</h3>
-<p>We follow the … of <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html" class="external-link">A
-machine learning tutorial : applications of the Bioconductor
-MLInterfaces package to gene expression data</a> by VJ Carey and P.
-Atieno</p>
-<p>3Learning with expression arrays Here we will concentrate on ALL:
-acute lymphocytic leukemia, B-cell type.</p>
-<p>3.1Phenotype reduction We will identify expression patterns that
-discriminate individuals with BCR/ABL fusion in B-cell leukemia.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"ALL"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ALL"</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="va">bALL</span> <span class="op">&lt;-</span> <span class="va">ALL</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">$</span><span class="va">BT</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">==</span> <span class="st">"B"</span><span class="op">]</span></span>
-<span><span class="va">fus</span> <span class="op">&lt;-</span> <span class="va">bALL</span><span class="op">[</span>, <span class="va">bALL</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BCR/ABL"</span>, <span class="st">"NEG"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">fus</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">fus</span><span class="op">$</span><span class="va">mol.biol</span><span class="op">)</span></span>
-<span><span class="va">fus</span> </span>
-<span><span class="co">#&gt; ExpressionSet (storageMode: lockedEnvironment)</span></span>
-<span><span class="co">#&gt; assayData: 12625 features, 79 samples </span></span>
-<span><span class="co">#&gt;   element names: exprs </span></span>
-<span><span class="co">#&gt; protocolData: none</span></span>
-<span><span class="co">#&gt; phenoData</span></span>
-<span><span class="co">#&gt;   sampleNames: 01005 01010 ... 84004 (79 total)</span></span>
-<span><span class="co">#&gt;   varLabels: cod diagnosis ... date last seen (21 total)</span></span>
-<span><span class="co">#&gt;   varMetadata: labelDescription</span></span>
-<span><span class="co">#&gt; featureData: none</span></span>
-<span><span class="co">#&gt; experimentData: use 'experimentData(object)'</span></span>
-<span><span class="co">#&gt;   pubMedIds: 14684422 16243790 </span></span>
-<span><span class="co">#&gt; Annotation: hgu95av2</span></span></code></pre></div>
-<p>3.2Nonspecific filtering We can nonspecifically filter to 300 genes
-(to save computing time) with largest measures of robust variation
-across all samples:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">fus</span><span class="op">)</span>,<span class="fl">1</span>,<span class="va">mad</span><span class="op">)</span> </span>
-<span><span class="va">fusk</span> <span class="op">&lt;-</span> <span class="va">fus</span><span class="op">[</span> <span class="va">mads</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">mads</span>,decr<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">300</span><span class="op">]</span>, <span class="op">]</span> </span>
-<span><span class="va">fcol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">fusk</span><span class="op">$</span><span class="va">mol.biol</span><span class="op">==</span><span class="st">"NEG"</span>, <span class="st">"gray"</span>, <span class="st">"steelblue"</span><span class="op">)</span></span></code></pre></div>
-<p>3.3Exploratory work For exploratory data analysis, a heatmap is
-customary.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/heatmap.html" class="external-link">heatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">fusk</span><span class="op">)</span>, ColSideColors<span class="op">=</span><span class="va">fcol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
-<p>Principal components and a biplot may be more revealing. How many
-principal components are likely to be important?</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">PCg</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">fusk</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/pairs.html" class="external-link">pairs</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>,col<span class="op">=</span><span class="va">fcol</span>,pch<span class="op">=</span><span class="fl">19</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-5-2.png" width="700"></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/biplot.html" class="external-link">biplot</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-5-3.png" width="700"></p>
-<p>Question 12. Modify the biplot so that instead of plotting sample ID,
-the symbol “O” is plotted for a NEG sample and “+” is plotted for a
-BCR/ABL sample. Question 13. Consider the following code</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">chkT</span> <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span>, <span class="va">eset</span><span class="op">=</span><span class="va">fusk</span><span class="op">)</span> <span class="op">{</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">eset</span><span class="op">)</span><span class="op">[</span><span class="va">x</span>, <span class="va">eset</span><span class="op">$</span><span class="va">mol.b</span> <span class="op">==</span> <span class="st">"NEG"</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">eset</span><span class="op">)</span><span class="op">[</span><span class="va">x</span>, <span class="va">eset</span><span class="op">$</span><span class="va">mol.b</span> <span class="op">==</span> </span>
-<span>    <span class="st">"BCR/ABL"</span><span class="op">]</span><span class="op">)</span> <span class="op">}</span></span></code></pre></div>
-<p>Use it in conjunction with the biplot to interpret expression
-patterns of genes that appear to be important in defining the PCs.</p>
-<p>3.4Classifier construction 3.4.1Demonstrations Diagonal LDA has a
-good reputation. Let’s try it first, followed by neural net and random
-forests. We will not attend to tuning the latter two, defaults or
-guesses for key parameters are used.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">MLInterfaces</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dld1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/MLearn-new.html" class="external-link">MLearn</a></span><span class="op">(</span> <span class="va">mol.biol</span><span class="op">~</span><span class="va">.</span>, <span class="va">fusk</span>, <span class="va">dldaI</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">40</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "mol.biol"</span></span>
-<span></span>
-<span><span class="va">dld1</span> </span>
-<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
-<span><span class="co">#&gt; The call was:</span></span>
-<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = fusk, .method = dldaI, </span></span>
-<span><span class="co">#&gt;     trainInd = 1:40)</span></span>
-<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
-<span><span class="co">#&gt;      27      12</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/confuMat-methods.html" class="external-link">confuMat</a></span><span class="op">(</span><span class="va">dld1</span><span class="op">)</span> </span>
-<span><span class="co">#&gt;          predicted</span></span>
-<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
-<span><span class="co">#&gt;   BCR/ABL      15   1</span></span>
-<span><span class="co">#&gt;   NEG          12  11</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nnALL</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/MLearn-new.html" class="external-link">MLearn</a></span><span class="op">(</span> <span class="va">mol.biol</span><span class="op">~</span><span class="va">.</span>, <span class="va">fusk</span>, <span class="va">nnetI</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, size<span class="op">=</span><span class="fl">5</span>, decay<span class="op">=</span><span class="fl">.01</span>, MaxNWts<span class="op">=</span><span class="fl">2000</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "mol.biol"</span></span>
-<span><span class="co">#&gt; # weights:  1506</span></span>
-<span><span class="co">#&gt; initial  value 32.624176 </span></span>
-<span><span class="co">#&gt; iter  10 value 14.551035</span></span>
-<span><span class="co">#&gt; iter  20 value 11.994412</span></span>
-<span><span class="co">#&gt; iter  30 value 4.024065</span></span>
-<span><span class="co">#&gt; iter  40 value 1.484303</span></span>
-<span><span class="co">#&gt; iter  50 value 1.347116</span></span>
-<span><span class="co">#&gt; iter  60 value 1.309560</span></span>
-<span><span class="co">#&gt; iter  70 value 0.836201</span></span>
-<span><span class="co">#&gt; iter  80 value 0.657234</span></span>
-<span><span class="co">#&gt; iter  90 value 0.651520</span></span>
-<span><span class="co">#&gt; iter 100 value 0.649107</span></span>
-<span><span class="co">#&gt; final  value 0.649107 </span></span>
-<span><span class="co">#&gt; stopped after 100 iterations</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/confuMat-methods.html" class="external-link">confuMat</a></span><span class="op">(</span><span class="va">nnALL</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          predicted</span></span>
-<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
-<span><span class="co">#&gt;   BCR/ABL      15   1</span></span>
-<span><span class="co">#&gt;   NEG           8  15</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rfALL</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/MLearn-new.html" class="external-link">MLearn</a></span><span class="op">(</span></span>
-<span><span class="va">mol.biol</span><span class="op">~</span><span class="va">.</span>, <span class="va">fusk</span>, <span class="va">randomForestI</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">40</span> <span class="op">)</span> </span>
-<span><span class="co">#&gt; [1] "mol.biol"</span></span>
-<span></span>
-<span><span class="va">rfALL</span></span>
-<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
-<span><span class="co">#&gt; The call was:</span></span>
-<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = fusk, .method = randomForestI, </span></span>
-<span><span class="co">#&gt;     trainInd = 1:40)</span></span>
-<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
-<span><span class="co">#&gt;      25      14 </span></span>
-<span><span class="co">#&gt; Summary of scores on test set (use testScores() method for details):</span></span>
-<span><span class="co">#&gt;   BCR/ABL       NEG </span></span>
-<span><span class="co">#&gt; 0.5367179 0.4632821</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/confuMat-methods.html" class="external-link">confuMat</a></span><span class="op">(</span><span class="va">rfALL</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          predicted</span></span>
-<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
-<span><span class="co">#&gt;   BCR/ABL      15   1</span></span>
-<span><span class="co">#&gt;   NEG          10  13</span></span></code></pre></div>
-<p>None of these are extremely impressive, but the problem may just be
-very hard.</p>
-<p>3.4.2Gene set appraisal Question 14. We can assess the predictive
-capacity of a set of genes by restricting the ExpressionSet to that set
-and using the best classifier appropriate to the problem. We can also
-assess the incremental effect of combining gene sets, relative to using
-them separately.</p>
-<p>One collection of gene sets that is straightforward to use and
-interpret is provided by the keggorthology package (see also GSEABase).
-Here’s how we can define the ExpressionSets for genes annotated by KEGG
-to Environmental (Genetic) Information Processing:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">keggorthology</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">KOgraph</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/graph/man/adj-methods.html" class="external-link">adj</a></span><span class="op">(</span><span class="va">KOgraph</span>,<span class="fu"><a href="https://rdrr.io/pkg/graph/man/graphNEL-class.html" class="external-link">nodes</a></span><span class="op">(</span><span class="va">KOgraph</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $KO.Feb10root</span></span>
-<span><span class="co">#&gt; [1] "Metabolism"                          </span></span>
-<span><span class="co">#&gt; [2] "Genetic Information Processing"      </span></span>
-<span><span class="co">#&gt; [3] "Environmental Information Processing"</span></span>
-<span><span class="co">#&gt; [4] "Cellular Processes"                  </span></span>
-<span><span class="co">#&gt; [5] "Organismal Systems"                  </span></span>
-<span><span class="co">#&gt; [6] "Human Diseases"</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">EIP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/keggorthology/man/getKOprobes.html" class="external-link">getKOprobes</a></span><span class="op">(</span><span class="st">"Environmental Information Processing"</span><span class="op">)</span></span>
-<span><span class="va">GIP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/keggorthology/man/getKOprobes.html" class="external-link">getKOprobes</a></span><span class="op">(</span><span class="st">"Genetic Information Processing"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">EIP</span>, <span class="va">GIP</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; [1] 44</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">EIPi</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">EIP</span>, <span class="va">GIP</span><span class="op">)</span> </span>
-<span><span class="va">GIP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">GIP</span>, <span class="va">EIP</span><span class="op">)</span> </span>
-<span><span class="va">EIP</span> <span class="op">=</span> <span class="va">EIPi</span></span>
-<span><span class="va">Efusk</span> <span class="op">=</span> <span class="va">fusk</span><span class="op">[</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/featureNames.html" class="external-link">featureNames</a></span><span class="op">(</span><span class="va">fusk</span><span class="op">)</span>  <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">EIP</span>, <span class="op">]</span></span>
-<span><span class="va">Gfusk</span> <span class="op">=</span> <span class="va">fusk</span><span class="op">[</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/featureNames.html" class="external-link">featureNames</a></span><span class="op">(</span><span class="va">fusk</span><span class="op">)</span>  <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">EIP</span>, <span class="op">]</span></span></code></pre></div>
-<p>Obtain and assess the predictive capacity of the genes annotated to
-“Cell Growth and Death”.</p>
-<p>Question 15. How many of the genes identified by RDA as important for
-discriminating fusion are annotated to Genetic Information Processing in
-the KEGG orthology? 4Embedding features selection in cross-validation We
-provide helper functions to conduct several kinds of feature selection
-in cross-validation, see help(fs.absT). Here we pick the top 30 features
-(ranked by absolute t statistic) for each cross-validation
-partition.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dldFS</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/MLearn-new.html" class="external-link">MLearn</a></span><span class="op">(</span> <span class="va">mol.biol</span><span class="op">~</span><span class="va">.</span>, <span class="va">fusk</span>, <span class="va">dldaI</span>, <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/xvalSpec.html" class="external-link">xvalSpec</a></span><span class="op">(</span><span class="st">"LOG"</span>, <span class="fl">5</span>, <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/balKfold.xvspec.html" class="external-link">balKfold.xvspec</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/fs.absT.html" class="external-link">fs.absT</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span> <span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "mol.biol"</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dldFS</span> </span>
-<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
-<span><span class="co">#&gt; The call was:</span></span>
-<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = fusk, .method = dldaI, </span></span>
-<span><span class="co">#&gt;     trainInd = xvalSpec("LOG", 5, balKfold.xvspec(5), fs.absT(30)))</span></span>
-<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
-<span><span class="co">#&gt;      42      37 </span></span>
-<span><span class="co">#&gt; history of feature selection in cross-validation available; use fsHistory()</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/confuMat-methods.html" class="external-link">confuMat</a></span><span class="op">(</span><span class="va">dld1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          predicted</span></span>
-<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
-<span><span class="co">#&gt;   BCR/ABL      15   1</span></span>
-<span><span class="co">#&gt;   NEG          12  11</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/confuMat-methods.html" class="external-link">confuMat</a></span><span class="op">(</span><span class="va">dldFS</span><span class="op">)</span> </span>
-<span><span class="co">#&gt;          predicted</span></span>
-<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
-<span><span class="co">#&gt;   BCR/ABL      34   3</span></span>
-<span><span class="co">#&gt;   NEG           8  34</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 1.1) Subset to B-cell lineage only (exclude T-cell)</span></span>
-<span><span class="va">bcell_eset</span> <span class="op">&lt;-</span> <span class="va">ALL</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^B"</span>, <span class="va">ALL</span><span class="op">$</span><span class="va">BT</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># 1.2) Define binary outcome: BCR/ABL+ vs others</span></span>
-<span><span class="va">bcell_pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/phenoData.html" class="external-link">pData</a></span><span class="op">(</span><span class="va">bcell_eset</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">rownames_to_column</a></span><span class="op">(</span><span class="st">"Sample"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
-<span>    <span class="va">Sample</span>,</span>
-<span>    <span class="va">BT</span>,  </span>
-<span>    BT_bin <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">BT</span> <span class="op">==</span> <span class="st">"BCR/ABL+"</span>, <span class="fl">1L</span>, <span class="fl">0L</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">bcell_pheno</span><span class="op">$</span><span class="va">BT</span>, <span class="va">bcell_pheno</span><span class="op">$</span><span class="va">BT_bin</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="traintest-split">2 Train/Test Split<a class="anchor" aria-label="anchor" href="#traintest-split"></a>
-</h3>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">bcell_pheno</span><span class="op">)</span></span>
-<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">0.7</span> <span class="op">*</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">train_eset</span>  <span class="op">&lt;-</span> <span class="va">bcell_eset</span><span class="op">[</span>, <span class="va">train_idx</span><span class="op">]</span></span>
-<span><span class="va">test_eset</span>   <span class="op">&lt;-</span> <span class="va">bcell_eset</span><span class="op">[</span>, <span class="op">-</span><span class="va">train_idx</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">train_pheno</span> <span class="op">&lt;-</span> <span class="va">bcell_pheno</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="va">train_idx</span><span class="op">)</span></span>
-<span><span class="va">test_pheno</span>  <span class="op">&lt;-</span> <span class="va">bcell_pheno</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="op">-</span><span class="va">train_idx</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  set      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"train"</span>,<span class="st">"test"</span><span class="op">)</span>,</span>
-<span>  n_samples<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">train_pheno</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">test_pheno</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="model-training-with-mlinterfaces">3 Model Training with MLInterfaces<a class="anchor" aria-label="anchor" href="#model-training-with-mlinterfaces"></a>
-</h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">learners</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"svmRadial"</span>, <span class="st">"glmnet"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu">trainML</span><span class="op">(</span></span>
-<span>  eset         <span class="op">=</span> <span class="va">train_eset</span>,</span>
-<span>  outcome      <span class="op">=</span> <span class="st">"BT_bin"</span>,</span>
-<span>  predict.type <span class="op">=</span> <span class="st">"prob"</span>,</span>
-<span>  learners     <span class="op">=</span> <span class="va">learners</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="model-evaluation">4 Model Evaluation<a class="anchor" aria-label="anchor" href="#model-evaluation"></a>
-</h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">predictML</span><span class="op">(</span></span>
-<span>  object  <span class="op">=</span> <span class="va">models</span>,</span>
-<span>  eset    <span class="op">=</span> <span class="va">test_eset</span>,</span>
-<span>  outcome <span class="op">=</span> <span class="st">"BT_bin"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Show accuracy and AUC</span></span>
-<span><span class="va">results</span><span class="op">$</span><span class="va">performance</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="exercise-1-try-k-nearest-neighbors">5 Exercise 1: Try k-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#exercise-1-try-k-nearest-neighbors"></a>
-</h3>
-<div class="exercise">
-<h5>
-Exercise:
-</h5>
-<p>
-Add <code>"knn"</code> to the <code>learners</code> vector, re-run
-<code>trainML</code> and <code>predictML</code>, and compare the k-NN
-performance to the other models.
-</p>
-<details><summary><strong>Hint</strong>
-</summary><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">learners2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">learners</span>, <span class="st">"knn"</span><span class="op">)</span></span>
-<span><span class="va">models2</span>   <span class="op">&lt;-</span> <span class="fu">trainML</span><span class="op">(</span>eset<span class="op">=</span><span class="va">train_eset</span>, outcome<span class="op">=</span><span class="st">"BT_bin"</span>, predict.type<span class="op">=</span><span class="st">"prob"</span>, learners<span class="op">=</span><span class="va">learners2</span><span class="op">)</span></span>
-<span><span class="va">results2</span>  <span class="op">&lt;-</span> <span class="fu">predictML</span><span class="op">(</span><span class="va">models2</span>, <span class="va">test_eset</span>, outcome<span class="op">=</span><span class="st">"BT_bin"</span><span class="op">)</span></span>
-<span><span class="va">results2</span><span class="op">$</span><span class="va">performance</span></span></code></pre></div>
-</details>
-</div>
-</div>
-<div class="section level3">
-<h3 id="variable-importance-partial-dependence">6 Variable Importance &amp; Partial Dependence<a class="anchor" aria-label="anchor" href="#variable-importance-partial-dependence"></a>
-</h3>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Variable importance for randomForest</span></span>
-<span><span class="va">imp_rf</span> <span class="op">&lt;-</span> <span class="fu">modelPartsML</span><span class="op">(</span><span class="va">models</span><span class="op">[[</span><span class="st">"randomForest"</span><span class="op">]</span><span class="op">]</span>, newdata<span class="op">=</span><span class="va">test_eset</span>, outcome<span class="op">=</span><span class="st">"BT_bin"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">imp_rf</span>, top<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Partial dependence for top gene</span></span>
-<span><span class="va">pd_rf</span> <span class="op">&lt;-</span> <span class="fu">modelProfileML</span><span class="op">(</span><span class="va">models</span><span class="op">[[</span><span class="st">"randomForest"</span><span class="op">]</span><span class="op">]</span>, newdata<span class="op">=</span><span class="va">test_eset</span>, vars<span class="op">=</span><span class="st">"Gene424"</span><span class="op">)</span>  <span class="co"># replace with top probe</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pd_rf</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="tutorial-4-genetic-gene-expression-data">5. Tutorial 4: Genetic (Gene Expression) Data<a class="anchor" aria-label="anchor" href="#tutorial-4-genetic-gene-expression-data"></a>
-</h3>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ipd-tools/ipd" class="external-link">ipd</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span>           <span class="co"># Bioconductor package with leukemia microarray</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/Biobase" class="external-link">Biobase</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> For the data loading and prediction workflows,
+we will directly follow the Bioconductor MLInterfaces vignette by VJ
+Carey and P Atieno:</p>
+<p><a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html" class="external-link uri">https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html</a></p>
+</blockquote>
 </div>
 <div class="section level2">
-<h2 id="background-motivation">Background &amp; Motivation<a class="anchor" aria-label="anchor" href="#background-motivation"></a>
+<h2 id="datasets-overview">Datasets Overview<a class="anchor" aria-label="anchor" href="#datasets-overview"></a>
 </h2>
-<p>We want to illustrate <strong>IPD</strong> in the context of a
-<strong>classification</strong> (logistic) problem using real gene
-expression data. The Bioconductor object
-<strong><code>ALL</code></strong> contains microarray expression levels
-for acute lymphoblastic leukemia patients, along with clinical
-annotations. In particular, the variable <code>BT</code> (BCR/ABL
-positive vs negative) can be the “true” binary outcome.</p>
-<p>We simulate a scenario where:</p>
-<ol style="list-style-type: decimal">
-<li>Only <strong>50%</strong> of patients have their true “BCR/ABL”
-status measured (labeled set).</li>
-<li>The remaining 50% have no measured status, but we predict it using a
-logistic model based on a single gene, say <code>CD19</code> expression
-(for simplicity).</li>
-<li>We then want to perform <strong>IPD</strong> to estimate the
-association between another gene (e.g. <code>CD38</code>) and true
-BCR/ABL status-correcting for the fact that we used a predicted binary
-label in the unlabeled half.</li>
-</ol>
-<p>Concretely, we will:</p>
+<p>We work with two public <a href="https://www.bioconductor.org/" class="external-link">Bioconductor</a> datasets:</p>
 <ul>
-<li>Use <code>ALL</code> expression data: extract
-<code>exprs(all)["CD19", ]</code> and
-<code>exprs(all)["CD38", ]</code>.</li>
-<li>Dichotomize <code>BT</code> into 0/1 (<code>"BCR/ABL+" = 1</code>,
-else 0).</li>
-<li>Split dataset 50/50 into <strong>labeled</strong> vs
-<strong>unlabeled</strong>.</li>
-<li>Fit a logistic regression (<strong>GLM</strong>) on the labeled half
-to predict <code>BT ~ CD19 + age + gender</code> (if age/gender
-available).</li>
-<li>Predict <code>BT_hat</code> in the unlabeled half (probabilities →
-0/1).</li>
-<li>Run <code>ipd::ipd(...)</code> to estimate $_{}$ in a logistic model
-<code>BT ~ CD38</code> (i.e., we ask: “what is the log-odds effect of
-CD38 expression on having BCR/ABL?”), adjusting for prediction
-error.</li>
+<li>
+<a href="https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html" class="external-link"><strong>ALL</strong></a>
+(<code>ALL</code> package): 128 samples of acute lymphoblastic leukemia
+(both B- and T-cell), profiled on the Affymetrix HGU95Av2 microarray.
+Phenotype data include <code>BT</code> (immunophenotype),
+<code>mol.biol</code> (molecular subtype including BCR-ABL1 or NEG),
+age, and sex.</li>
+<li>
+<a href="https://www.bioconductor.org/packages/release/data/experiment/manuals/golubEsets/man/golubEsets.pdf" class="external-link"><strong>Golub_Merge</strong></a>
+(<code>golubEsets</code> package): 72 samples of leukemias (ALL
+vs. AML), profiled on Affymetrix HGU6800. Phenotype data include
+<code>ALL.AML</code>, <code>T.B.cell</code> (lineage), age, and
+sex.</li>
 </ul>
-<hr>
-<div class="section level3">
-<h3 id="load-and-preprocess-the-all-dataset">5.1 Load and Preprocess the <code>ALL</code> Dataset<a class="anchor" aria-label="anchor" href="#load-and-preprocess-the-all-dataset"></a>
-</h3>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1) Install ALL if necessary:</span></span>
-<span><span class="co"># BiocManager::install("ALL")</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2) Explore the ALL object:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/phenoData.html" class="external-link">pData</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">cvv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span>,<span class="fl">1</span>,<span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="fu">sd</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">ok</span> <span class="op">&lt;-</span> <span class="va">cvv</span> <span class="op">&gt;</span> <span class="fl">.08</span> <span class="op">&amp;</span> <span class="va">cvv</span> <span class="op">&lt;</span> <span class="fl">.18</span></span>
-<span><span class="va">fALL</span> <span class="op">&lt;-</span> <span class="va">ALL</span><span class="op">[</span><span class="va">ok</span>,<span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></span><span class="op">(</span><span class="va">fALL</span><span class="op">)</span></span></code></pre></div>
-<p>The object <code>ALL</code> is an <code>ExpressionSet</code>
-with:</p>
-<ul>
-<li>Expression matrix: <code>exprs(ALL)</code> (features ×
-samples).</li>
-<li>Phenotype data: <code>pData(ALL)</code> (samples × clinical
-variables), including <code>BT</code>, <code>age</code>,
-<code>sex</code>, etc.</li>
-</ul>
-<p>We extract:</p>
-<ul>
-<li>Gene expression for <code>CD19</code> and <code>CD38</code>.</li>
-<li>Binary outcome <code>BT</code>: recode <code>BT == "BCR/ABL+"</code>
-as 1, else 0.</li>
-<li>Clinical covariates: <code>age</code> (in years), <code>sex</code>
-(factor “M”/“F”).</li>
-</ul>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">hgu95av2.db</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/AnnotationDbi" class="external-link">AnnotationDbi</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 1. Get the one PROBEID each for CD19/CD38</span></span>
-<span><span class="va">mapping</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>  <span class="va">hgu95av2.db</span>,</span>
-<span>  keys    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PROBEID"</span>,<span class="st">"SYMBOL"</span><span class="op">)</span>,</span>
-<span>  keytype <span class="op">=</span> <span class="st">"PROBEID"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">probe_CD19</span> <span class="op">&lt;-</span> <span class="va">mapping</span><span class="op">$</span><span class="va">PROBEID</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">mapping</span><span class="op">$</span><span class="va">SYMBOL</span><span class="op">==</span><span class="st">"CD19"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">probe_CD38</span> <span class="op">&lt;-</span> <span class="va">mapping</span><span class="op">$</span><span class="va">PROBEID</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">mapping</span><span class="op">$</span><span class="va">SYMBOL</span><span class="op">==</span><span class="st">"CD38"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">expr_CD19</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span><span class="op">[</span><span class="va">probe_CD19</span>, <span class="op">]</span></span>
-<span><span class="va">expr_CD38</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/exprs.html" class="external-link">exprs</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span><span class="op">[</span><span class="va">probe_CD38</span>, <span class="op">]</span></span>
-<span></span>
-<span><span class="co"># 2. Build pheno tibble</span></span>
-<span><span class="va">pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/phenoData.html" class="external-link">pData</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html" class="external-link">rownames_to_column</a></span><span class="op">(</span>var <span class="op">=</span> <span class="st">"SEQN"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>      <span class="co"># copy sample IDs</span></span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">SEQN</span>, <span class="va">BT</span>, <span class="va">age</span>, <span class="va">sex</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    <span class="co"># New binary: all B-cell lineages → 1, all T-cell lineages → 0</span></span>
-<span>    BT_bin <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="va">BT</span>, <span class="st">"B"</span><span class="op">)</span>, <span class="fl">1L</span>, <span class="fl">0L</span><span class="op">)</span>,</span>
-<span>    sex    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sex</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M"</span>,<span class="st">"F"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    CD19   <span class="op">=</span> <span class="va">expr_CD19</span><span class="op">[</span><span class="va">SEQN</span><span class="op">]</span>,</span>
-<span>    CD38   <span class="op">=</span> <span class="va">expr_CD38</span><span class="op">[</span><span class="va">SEQN</span><span class="op">]</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">age</span><span class="op">)</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">BT_bin</span><span class="op">)</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">CD19</span><span class="op">)</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">CD38</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Check</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pheno</span><span class="op">$</span><span class="va">BT</span><span class="op">)</span>       <span class="co"># shows B/B1… vs T/T1…</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pheno</span><span class="op">$</span><span class="va">BT_bin</span><span class="op">)</span>   <span class="co"># now balanced 1's vs 0's</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pheno</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Note:</strong> If multiple probes map to the same gene, you
-could take the average or median; here, we assume one row per gene.</p>
-</blockquote>
-<hr>
+<p>We will train our classifiers on a subset of the <code>ALL</code>
+data, test the model on the holdout <code>ALL</code> data, and perform
+IPD on the holdout <code>ALL</code> and <code>Golub</code> data.</p>
 </div>
-<div class="section level3">
-<h3 id="split-into-labeled-vs-unlabeled">5.2 Split into Labeled vs Unlabeled<a class="anchor" aria-label="anchor" href="#split-into-labeled-vs-unlabeled"></a>
-</h3>
-<p>We’ll randomly label <strong>50%</strong> (labeled) and hide
-<code>BT_bin</code> for the other 50% (unlabeled). The labeled set will
-be used to fit the logistic prediction model; the unlabeled set’s
-outcome will be predicted.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
-<span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pheno</span><span class="op">)</span></span>
-<span><span class="va">n_label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">N</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span><span class="va">labeled_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/Bimap-envirAPI.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, <span class="va">n_label</span><span class="op">)</span></span>
+<div class="section level2">
+<h2 id="phenotype-reduction-and-feature-filtering">Phenotype Reduction and Feature Filtering<a class="anchor" aria-label="anchor" href="#phenotype-reduction-and-feature-filtering"></a>
+</h2>
+<p>We first narrow to B-cell ALL samples and reduce dimensionality by
+keeping the 500 most variable probes.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the ALL data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">all_ipd</span> <span class="op">&lt;-</span> <span class="va">pheno</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    set_label <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">labeled_idx</span>, <span class="st">"labeled"</span>, <span class="st">"unlabeled"</span><span class="op">)</span>,</span>
-<span>    Y <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span>, <span class="va">BT_bin</span>, <span class="cn">NA_real_</span><span class="op">)</span>,  <span class="co"># hide in unlabeled</span></span>
-<span>    pred_gene <span class="op">=</span> <span class="va">CD19</span>   <span class="co"># we will use CD19 as our predictor for BT</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">set_label</span>, <span class="va">Y</span>, <span class="va">pred_gene</span>, <span class="va">CD38</span>, <span class="va">age</span>, <span class="va">sex</span><span class="op">)</span></span>
+<span><span class="co"># Subset ALL to B-cell lineage (BT codes starting with "B")</span></span>
+<span><span class="va">bALL</span> <span class="op">&lt;-</span> <span class="va">ALL</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="fu">pData</span><span class="op">(</span><span class="va">ALL</span><span class="op">)</span><span class="op">$</span><span class="va">BT</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">==</span> <span class="st">"B"</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Check counts:</span></span>
-<span><span class="va">all_ipd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">set_label</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Keep only fusion-negative ("NEG") and fusion-positive ("BCR/ABL") samples</span></span>
+<span><span class="va">fus</span> <span class="op">&lt;-</span> <span class="va">bALL</span><span class="op">[</span>, <span class="va">bALL</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NEG"</span>, <span class="st">"BCR/ABL"</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Convert to factor with clear levels: NEG=0, BCR/ABL=1</span></span>
+<span><span class="va">fus</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">fus</span><span class="op">$</span><span class="va">mol.biol</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NEG"</span>, <span class="st">"BCR/ABL"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compute median absolute deviation (MAD) for each probe</span></span>
+<span><span class="va">devs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">fus</span><span class="op">)</span>, <span class="fl">1</span>, <span class="va">mad</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select top 500 most variable probes by MAD ranking</span></span>
+<span><span class="va">top500</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">devs</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">500</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Subset ExpressionSet to top 500 probes</span></span>
+<span><span class="va">dat_filt</span> <span class="op">&lt;-</span> <span class="va">fus</span><span class="op">[</span><span class="va">top500</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Confirm dimensions: 500 probes x n samples</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">dat_filt</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 500  79</span></span></code></pre></div>
 <blockquote>
 <p><strong>Explanation:</strong></p>
 <ul>
 <li>
-<code>Y</code> holds the true binary outcome (<code>0</code> or
-<code>1</code>) only for labeled rows.</li>
-<li>
-<code>pred_gene = CD19</code> is the predictor we will use to
-predict BCR/ABL status in the unlabeled set.</li>
-<li>
-<code>CD38</code>, <code>age</code>, and <code>sex</code> are
-covariates for the downstream model of interest.</li>
-</ul>
-</blockquote>
-<hr>
-</div>
-<div class="section level3">
-<h3 id="fit-a-prediction-model-logistic-on-labeled">5.3 Fit a Prediction Model (Logistic) on Labeled<a class="anchor" aria-label="anchor" href="#fit-a-prediction-model-logistic-on-labeled"></a>
-</h3>
-<p>Fit a <strong>logistic (GLM)</strong> for
-<code>Y ∼ pred_gene + age + sex</code> on the labeled data:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span></span>
-<span>  formula <span class="op">=</span> <span class="va">Y</span> <span class="op">~</span> <span class="va">pred_gene</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span>,</span>
-<span>  data    <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">all_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span>,</span>
-<span>  family  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">glm_pred</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span><span class="co"># install.packages("logistf")   # if needed</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/georgheinze/logistf" class="external-link">logistf</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 1) Fit Firth-penalized logistic on the labeled subset</span></span>
-<span><span class="va">labeled_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">all_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">firth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/logistf/man/logistf.html" class="external-link">logistf</a></span><span class="op">(</span></span>
-<span>  formula <span class="op">=</span> <span class="va">Y</span> <span class="op">~</span> <span class="va">pred_gene</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span>,</span>
-<span>  data    <span class="op">=</span> <span class="va">labeled_df</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2) Summarize with broom</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/" class="external-link">broom</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">firth_mod</span><span class="op">)</span></span></code></pre></div>
-<p>Generate predicted probabilities (<code>p_hat = P(Y=1)</code>) for
-<em>all</em> samples, then create a binary “hard” prediction (≥ 0.5 → 1
-else 0) for demonstration. IPD can also use the probabilities directly,
-but most IPD methods treat the predicted outcome as numeric: here, we
-cast to 0/1.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">all_ipd</span> <span class="op">&lt;-</span> <span class="va">all_ipd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    predicted_prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">glm_pred</span>, newdata <span class="op">=</span> <span class="va">.</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span>,</span>
-<span>    predicted_Y    <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">predicted_prob</span> <span class="op">&gt;=</span> <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Verify:</span></span>
-<span><span class="va">all_ipd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Y</span>, <span class="va">predicted_prob</span>, <span class="va">predicted_Y</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">all_ipd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"unlabeled"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span><span class="va">predicted_prob</span>, <span class="va">predicted_Y</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Note:</strong> In real IPD practice, you can feed the
-predicted probabilities directly; here, we convert to a discrete
-prediction so that downstream logistic IPD is clearer. Alternatively,
-use continuous probabilities and adjust IPD accordingly.</p>
-</blockquote>
-<hr>
-</div>
-<div class="section level3">
-<h3 id="naive-vs-classical-vs-ipd-for-cd38-effect">5.4 Naive vs Classical vs IPD for <code>CD38</code> Effect<a class="anchor" aria-label="anchor" href="#naive-vs-classical-vs-ipd-for-cd38-effect"></a>
-</h3>
-<p>We want to estimate the log-odds effect of <code>CD38</code> on true
-BCR/ABL status in a logistic model:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mfrac><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">CD38</mtext></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">CD38</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\log \frac{\Pr(Y=1)}{\Pr(Y=0)} \;=\; \beta_0 + \beta_{\text{CD38}} \,\text{CD38}.
-</annotation></semantics></math></p>
-<p>We ignore <code>age</code> and <code>sex</code> in this downstream
-model, purely to show how IPD works when you have a predicted binary
-outcome.</p>
-<div class="section level4">
-<h4 id="naive">5.4.1 Naive<a class="anchor" aria-label="anchor" href="#naive"></a>
-</h4>
-<p>Fit logistic regression on <strong>unlabeled</strong> only, treating
-<code>predicted_Y</code> as if it were truth:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unlabeled_ALL</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">all_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"unlabeled"</span><span class="op">)</span></span>
-<span><span class="va">naive_logit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">predicted_Y</span> <span class="op">~</span> <span class="va">CD38</span>, data <span class="op">=</span> <span class="va">unlabeled_ALL</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">naive_coef</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">naive_logit</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"CD38"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Estimate"</span>, <span class="st">"Std. Error"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">naive_coef</span></span></code></pre></div>
-<blockquote>
-<p><strong>Interpretation:</strong></p>
-<ul>
-<li>Because <code>predicted_Y</code> was a function of
-<code>CD19</code>, which may correlate with <code>CD38</code>, the
-association between <code>CD38</code> and <code>predicted_Y</code> is
-biased (and the SE is mis-estimated).</li>
+<code><a href="https://rdrr.io/r/stats/mad.html" class="external-link">mad()</a></code> is robust to outliers and captures
+variability.</li>
+<li>Filtering saves time on downstream analysis without losing key
+signals.</li>
+<li>We now have <code>dat_filt</code>, a filtered ALL dataset focused on
+B-cell lineage and the most informative probes.</li>
 </ul>
 </blockquote>
 </div>
-<div class="section level4">
-<h4 id="classical">5.4.2 Classical<a class="anchor" aria-label="anchor" href="#classical"></a>
-</h4>
-<p>Fit logistic regression on the <strong>labeled</strong> subset, using
-true <code>Y</code>:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">labeled_ALL</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">all_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span></span>
-<span><span class="va">classical_logit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">CD38</span>, data <span class="op">=</span> <span class="va">labeled_ALL</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">classical_coef</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">classical_logit</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"CD38"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Estimate"</span>, <span class="st">"Std. Error"</span><span class="op">)</span><span class="op">]</span></span>
+<div class="section level2">
+<h2 id="cross-platform-probe-harmonization">Cross-Platform Probe Harmonization<a class="anchor" aria-label="anchor" href="#cross-platform-probe-harmonization"></a>
+</h2>
+<p>To predict on the <code>Golub</code> data, which uses a different
+array, we map probes from each platform to gene symbols, then intersect
+to find a common gene set.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the Golub data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Golub_Merge</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">classical_coef</span></span></code></pre></div>
+<span><span class="co"># Map HGU95Av2 probes (ALL) to gene symbols</span></span>
+<span><span class="va">gmap_all</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span></span>
+<span>  <span class="va">hgu95av2.db</span>,</span>
+<span>  keys    <span class="op">=</span> <span class="fu">featureNames</span><span class="op">(</span><span class="va">dat_filt</span><span class="op">)</span>,</span>
+<span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PROBEID"</span>,<span class="st">"SYMBOL"</span><span class="op">)</span>,</span>
+<span>  keytype <span class="op">=</span> <span class="st">"PROBEID"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># HGU6800 probes (Golub) to gene symbols</span></span>
+<span><span class="va">gmap_golub</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span></span>
+<span>  <span class="va">hu6800.db</span>,</span>
+<span>  keys    <span class="op">=</span> <span class="fu">featureNames</span><span class="op">(</span><span class="va">Golub_Merge</span><span class="op">)</span>,</span>
+<span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PROBEID"</span>,<span class="st">"SYMBOL"</span><span class="op">)</span>,</span>
+<span>  keytype <span class="op">=</span> <span class="st">"PROBEID"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Identify common symbols</span></span>
+<span><span class="va">common_sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">gmap_all</span><span class="op">$</span><span class="va">SYMBOL</span>, <span class="va">gmap_golub</span><span class="op">$</span><span class="va">SYMBOL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># For each symbol, pick the first associated probe</span></span>
+<span><span class="va">probe_all</span> <span class="op">&lt;-</span> <span class="va">gmap_all</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">SYMBOL</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">common_sym</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">SYMBOL</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">probe_golub</span> <span class="op">&lt;-</span> <span class="va">gmap_golub</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">SYMBOL</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">common_sym</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">SYMBOL</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Subset ExpressionSets to these probes</span></span>
+<span><span class="va">dat_train</span>  <span class="op">&lt;-</span> <span class="va">dat_filt</span><span class="op">[</span><span class="va">probe_all</span><span class="op">$</span><span class="va">PROBEID</span>, <span class="op">]</span></span>
+<span><span class="va">eset_golub</span> <span class="op">&lt;-</span> <span class="va">Golub_Merge</span><span class="op">[</span><span class="va">probe_golub</span><span class="op">$</span><span class="va">PROBEID</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Further subset Golub to B-cell ALL samples</span></span>
+<span><span class="va">golub_bALL</span> <span class="op">&lt;-</span> <span class="va">eset_golub</span><span class="op">[</span>, <span class="fu">pData</span><span class="op">(</span><span class="va">eset_golub</span><span class="op">)</span><span class="op">$</span><span class="va">T.B.cell</span> <span class="op">==</span> <span class="st">"B-cell"</span> <span class="op">&amp;</span></span>
+<span>                           <span class="fu">pData</span><span class="op">(</span><span class="va">eset_golub</span><span class="op">)</span><span class="op">$</span><span class="va">ALL.AML</span>  <span class="op">==</span> <span class="st">"ALL"</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu">featureNames</span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">probe_all</span><span class="op">$</span><span class="va">SYMBOL</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">probe_all</span><span class="op">$</span><span class="va">SYMBOL</span></span>
+<span></span>
+<span><span class="fu">featureNames</span><span class="op">(</span><span class="va">golub_bALL</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">probe_golub</span><span class="op">$</span><span class="va">SYMBOL</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">golub_bALL</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">probe_golub</span><span class="op">$</span><span class="va">SYMBOL</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># Confirm feature dimensions</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span>    <span class="co"># features x ALL samples</span></span>
+<span><span class="co">#&gt; Features  Samples </span></span>
+<span><span class="co">#&gt;      354       79</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">golub_bALL</span><span class="op">)</span>   <span class="co"># features x Golub B-cell ALL samples</span></span>
+<span><span class="co">#&gt; Features  Samples </span></span>
+<span><span class="co">#&gt;      354       38</span></span></code></pre></div>
+<blockquote>
+<p><code>dat_train</code> and <code>golub_BALL</code> now share the same
+gene-symbol feature set, ready for model training and transfer.</p>
+</blockquote>
+</div>
+<div class="section level2">
+<h2 id="exploratory-data-analysis">Exploratory Data Analysis<a class="anchor" aria-label="anchor" href="#exploratory-data-analysis"></a>
+</h2>
+<p>With our filtered training set (<code>dat_train</code>), we explore
+patterns using a heatmap and principal component analysis (PCA).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Set subtype colors for visualization</span></span>
+<span><span class="va">fcol</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">dat_train</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op">==</span> <span class="st">"NEG"</span>, <span class="st">"gray"</span>, <span class="st">"steelblue"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/heatmap.html" class="external-link">heatmap</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span>, ColSideColors <span class="op">=</span> <span class="va">fcol</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-3-1.png" width="100%"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># PCA on samples</span></span>
+<span><span class="va">PCg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu">exprs</span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Scree plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-4-1.png" width="100%"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Scatterplots of PCs</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/pairs.html" class="external-link">pairs</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, col <span class="op">=</span> <span class="va">fcol</span>, pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-5-1.png" width="100%"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Biplot of PC1 vs PC2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/biplot.html" class="external-link">biplot</a></span><span class="op">(</span><span class="va">PCg</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-6-1.png" width="100%"></p>
 <blockquote>
 <p><strong>Interpretation:</strong></p>
 <ul>
-<li>This uses only 50% of samples, so it might be noisy (wide CI) but
-unbiased (since we use true <code>Y</code>).</li>
+<li>The heatmap reveals distinct blocks of probes whose expression
+differs between BCR-ABL1 fusion-positive and fusion-negative
+samples.</li>
+<li>The PCA scatter shows separation (or overlap) of samples by fusion
+status along the first two principal components, and to a lesser extent,
+the next three.</li>
+<li>In the biplot, probes lying far from the origin along PC1 or PC2
+represent genes with the largest loadings, i.e., the greatest
+contribution to those principal components. Samples positioned similarly
+share expression patterns in those genes.</li>
+<li>Overall, the modest separation in PCA indicates the need for
+supervised methods to pinpoint the genes most predictive of BCR-ABL1
+status.</li>
 </ul>
 </blockquote>
-<hr>
 </div>
-<div class="section level4">
-<h4 id="ipd">5.4.3 IPD<a class="anchor" aria-label="anchor" href="#ipd"></a>
-</h4>
-<p>Now use <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd::ipd()</a></code> to correct for the fact that 50% of
-outcomes were imputed via a logistic model on <code>CD19</code>. We run
-only logistic IPD by specifying <code>family = binomial</code> inside
-the formula:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare ipd data.frame with required columns:</span></span>
-<span><span class="va">ipd_ALL_df</span> <span class="op">&lt;-</span> <span class="va">all_ipd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">select</a></span><span class="op">(</span><span class="va">set_label</span>, <span class="va">Y</span>, <span class="va">predicted_Y</span>, <span class="va">CD38</span><span class="op">)</span>  <span class="co"># we only need CD38 for downstream</span></span>
+<div class="section level2">
+<h2 id="traintest-split-and-classifier-training">Train/Test Split and Classifier Training<a class="anchor" aria-label="anchor" href="#traintest-split-and-classifier-training"></a>
+</h2>
+<p>We split <code>dat_train</code> (ALL) into 60% training and 40%
+holdout, then train three ML models.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span>                <span class="co"># for reproducibility</span></span>
+<span><span class="va">n_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">dat_train</span><span class="op">)</span>      <span class="co"># number of ALL samples</span></span>
+<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">n_all</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">0.6</span> <span class="op">*</span> <span class="va">n_all</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Training and holdout ExpressionSets</span></span>
+<span><span class="va">train_eset</span> <span class="op">&lt;-</span> <span class="va">dat_train</span><span class="op">[</span>, <span class="va">train_idx</span><span class="op">]</span></span>
+<span><span class="va">test_eset</span>  <span class="op">&lt;-</span> <span class="va">dat_train</span><span class="op">[</span>, <span class="op">-</span><span class="va">train_idx</span><span class="op">]</span></span></code></pre></div>
+<p>In this section, we compare three supervised learning methods using
+the <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/MLInterfaces/inst/doc/MLprac2_2.html" class="external-link"><code>MLInterfaces</code></a>
+framework:</p>
+<ul>
+<li><strong>Diagonal Linear Discriminant Analysis (dldaI)</strong></li>
+<li><strong>Neural Network (nnetI)</strong></li>
+<li><strong>Random Forest (randomForestI)</strong></li>
+</ul>
+<p>We will use the <code>MLearn()</code> function, which wraps each
+algorithm, providing a consistent interface to train, predict, and
+evaluate models on an <code>ExpressionSet</code>. After fitting, we will
+use <code>confuMat()</code> to display the confusion matrix, showing the
+true versus predicted class counts.</p>
+<p>We train each model on the first 40 most variable probes from the
+filtered <code>ExpressionSet</code> (features <code>1:40</code> in
+<code>train_eset</code>).</p>
+<div class="section level3">
+<h3 id="diagonal-linear-discriminant-analysis-dldai">Diagonal Linear Discriminant Analysis (<code>dldaI</code>)<a class="anchor" aria-label="anchor" href="#diagonal-linear-discriminant-analysis-dldai"></a>
+</h3>
+<p>Diagonal LDA assumes each feature is conditionally independent
+(covariance matrix is diagonal), which can improve stability in
+high-dimensional, low-sample settings. We use the <code>dldaI</code>
+interface to fit and evaluate this classifier.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Train Diagonal LDA on probes 1:40</span></span>
+<span><span class="va">dlda_mod</span> <span class="op">&lt;-</span> <span class="fu">MLearn</span><span class="op">(</span></span>
+<span>  <span class="va">mol.biol</span> <span class="op">~</span> <span class="va">.</span>, <span class="co"># mol.biol ~ . specifies BCR/ABL1 fusion status as the outcome</span></span>
+<span>  <span class="va">train_eset</span>,   <span class="co"># Filtered ExpressionSet</span></span>
+<span>  <span class="va">dldaI</span>,        <span class="co"># dldaI is the diagonal LDA interface</span></span>
+<span>  <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>          <span class="co"># 1:40 selects the first 40 probes</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "mol.biol"</span></span>
 <span></span>
-<span><span class="co"># Note: ipd() automatically recognizes the model family if you specify `family = "binomial"`</span></span>
-<span><span class="co">#       within the formula (see ?ipd).  For demonstration, we explicitly pass a 2-level Y.</span></span>
+<span><span class="co"># Print a summary of the fitted model</span></span>
+<span><span class="va">dlda_mod</span></span>
+<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
+<span><span class="co">#&gt; The call was:</span></span>
+<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = train_eset, .method = dldaI, </span></span>
+<span><span class="co">#&gt;     trainInd = 1:40)</span></span>
+<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
+<span><span class="co">#&gt;       3       4</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
-<span><span class="va">ipd_ALL_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd</a></span><span class="op">(</span></span>
-<span>  formula   <span class="op">=</span> <span class="va">Y</span> <span class="op">~</span> <span class="va">CD38</span>,</span>
-<span>  data      <span class="op">=</span> <span class="va">ipd_ALL_df</span>,</span>
-<span>  true_col  <span class="op">=</span> <span class="st">"Y"</span>,</span>
-<span>  pred_col  <span class="op">=</span> <span class="st">"predicted_Y"</span>,</span>
-<span>  label_col <span class="op">=</span> <span class="st">"set_label"</span>,</span>
-<span>  family    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span>,</span>
-<span>  method    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"postpi_analytic"</span>, <span class="st">"ppi"</span>, <span class="st">"ppi_plus"</span>, <span class="st">"chen"</span><span class="op">)</span>,</span>
-<span>  nboot     <span class="op">=</span> <span class="fl">200</span></span>
+<span><span class="co"># Display the confusion matrix (true vs predicted)</span></span>
+<span><span class="va">cm_dlda</span> <span class="op">&lt;-</span> <span class="fu">confuMat</span><span class="op">(</span><span class="va">dlda_mod</span><span class="op">)</span></span>
+<span><span class="va">cm_dlda</span></span>
+<span><span class="co">#&gt;          predicted</span></span>
+<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
+<span><span class="co">#&gt;   BCR/ABL       3   1</span></span>
+<span><span class="co">#&gt;   NEG           0   3</span></span>
+<span></span>
+<span><span class="co"># Accuracy of Diagonal LDA</span></span>
+<span><span class="va">acc_dlda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">cm_dlda</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cm_dlda</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.2f%%"</span>, <span class="va">acc_dlda</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Accuracy: 85.71%</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="neural-network-nneti">Neural Network (<code>nnetI</code>)<a class="anchor" aria-label="anchor" href="#neural-network-nneti"></a>
+</h3>
+<p>A single hidden layer neural network can capture non-linear
+relationships. We use the <code>nnetI</code> interface with default
+parameters plus:</p>
+<ul>
+<li><p><code>size = 5</code>: number of hidden neurons</p></li>
+<li><p><code>decay = 0.01</code>: weight-decay regularization</p></li>
+<li><p><code>MaxNWts = 2000</code>: maximum allowed number of
+weights</p></li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Neural Network (nnetI)</span></span>
+<span><span class="va">nn_mod</span> <span class="op">&lt;-</span> <span class="fu">MLearn</span><span class="op">(</span></span>
+<span>  <span class="va">mol.biol</span> <span class="op">~</span> <span class="va">.</span>, </span>
+<span>  <span class="va">train_eset</span>, </span>
+<span>  <span class="va">nnetI</span>, </span>
+<span>  <span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, </span>
+<span>  size<span class="op">=</span><span class="fl">5</span>, </span>
+<span>  decay<span class="op">=</span><span class="fl">0.01</span>, </span>
+<span>  MaxNWts<span class="op">=</span><span class="fl">2000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "mol.biol"</span></span>
+<span><span class="co">#&gt; # weights:  1781</span></span>
+<span><span class="co">#&gt; initial  value 31.210991 </span></span>
+<span><span class="co">#&gt; iter  10 value 19.645950</span></span>
+<span><span class="co">#&gt; iter  20 value 12.779243</span></span>
+<span><span class="co">#&gt; iter  30 value 5.459003</span></span>
+<span><span class="co">#&gt; iter  40 value 1.841191</span></span>
+<span><span class="co">#&gt; iter  50 value 1.334631</span></span>
+<span><span class="co">#&gt; iter  60 value 1.133200</span></span>
+<span><span class="co">#&gt; iter  70 value 0.875814</span></span>
+<span><span class="co">#&gt; iter  80 value 0.704137</span></span>
+<span><span class="co">#&gt; iter  90 value 0.625722</span></span>
+<span><span class="co">#&gt; iter 100 value 0.610470</span></span>
+<span><span class="co">#&gt; final  value 0.610470 </span></span>
+<span><span class="co">#&gt; stopped after 100 iterations</span></span>
+<span></span>
+<span><span class="co"># Show model summary</span></span>
+<span><span class="va">nn_mod</span></span>
+<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
+<span><span class="co">#&gt; The call was:</span></span>
+<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = train_eset, .method = nnetI, </span></span>
+<span><span class="co">#&gt;     trainInd = 1:40, size = 5, decay = 0.01, MaxNWts = 2000)</span></span>
+<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
+<span><span class="co">#&gt;       5       2 </span></span>
+<span><span class="co">#&gt; Summary of scores on test set (use testScores() method for details):</span></span>
+<span><span class="co">#&gt; [1] 0.2948988</span></span>
+<span></span>
+<span><span class="co"># Confusion matrix for Neural Net</span></span>
+<span><span class="va">cm_nn</span> <span class="op">&lt;-</span> <span class="fu">confuMat</span><span class="op">(</span><span class="va">nn_mod</span><span class="op">)</span></span>
+<span><span class="va">cm_nn</span></span>
+<span><span class="co">#&gt;          predicted</span></span>
+<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
+<span><span class="co">#&gt;   BCR/ABL       4   0</span></span>
+<span><span class="co">#&gt;   NEG           1   2</span></span>
+<span></span>
+<span><span class="co"># Accuracy of Neural Net</span></span>
+<span><span class="va">acc_nn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">cm_nn</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cm_nn</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.2f%%"</span>, <span class="va">acc_nn</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Accuracy: 85.71%</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="random-forest-randomforesti">Random Forest (<code>randomForestI</code>)<a class="anchor" aria-label="anchor" href="#random-forest-randomforesti"></a>
+</h3>
+<p>Random forests build an ensemble of decision trees on bootstrapped
+samples and random feature subsets, offering robust performance with
+little tuning. We use the <code>randomForestI</code> to fit a random
+forest model:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Random Forest (randomForestI)</span></span>
+<span><span class="va">rf_mod</span> <span class="op">&lt;-</span> <span class="fu">MLearn</span><span class="op">(</span></span>
+<span>  <span class="va">mol.biol</span> <span class="op">~</span> <span class="va">.</span>, </span>
+<span>  <span class="va">train_eset</span>, </span>
+<span>  <span class="va">randomForestI</span>, </span>
+<span>  <span class="fl">1</span><span class="op">:</span><span class="fl">40</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "mol.biol"</span></span>
+<span></span>
+<span><span class="co"># Show model summary</span></span>
+<span><span class="va">rf_mod</span></span>
+<span><span class="co">#&gt; MLInterfaces classification output container</span></span>
+<span><span class="co">#&gt; The call was:</span></span>
+<span><span class="co">#&gt; MLearn(formula = mol.biol ~ ., data = train_eset, .method = randomForestI, </span></span>
+<span><span class="co">#&gt;     trainInd = 1:40)</span></span>
+<span><span class="co">#&gt; Predicted outcome distribution for test set:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
+<span><span class="co">#&gt;       4       3 </span></span>
+<span><span class="co">#&gt; Summary of scores on test set (use testScores() method for details):</span></span>
+<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
+<span><span class="co">#&gt;   0.524   0.476</span></span>
+<span></span>
+<span><span class="co"># Confusion matrix</span></span>
+<span><span class="va">cm_rf</span> <span class="op">&lt;-</span> <span class="fu">confuMat</span><span class="op">(</span><span class="va">rf_mod</span><span class="op">)</span></span>
+<span><span class="va">cm_rf</span></span>
+<span><span class="co">#&gt;          predicted</span></span>
+<span><span class="co">#&gt; given     BCR/ABL NEG</span></span>
+<span><span class="co">#&gt;   BCR/ABL       4   0</span></span>
+<span><span class="co">#&gt;   NEG           0   3</span></span>
+<span></span>
+<span><span class="co"># Accuracy of Random Forest</span></span>
+<span><span class="va">acc_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">cm_rf</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cm_rf</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%.2f%%"</span>, <span class="va">acc_rf</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Accuracy: 100.00%</span></span></code></pre></div>
+<blockquote>
+<p><strong>Interpretation:</strong> Only the Random Forest achieves
+perfect separation in the validation samples. This highlights the
+challenge of discriminating BCR-ABL1 status based solely on the top
+variable probes and underscores why downstream IPD corrections (for
+regression inference) remain valuable.</p>
+</blockquote>
+</div>
+</div>
+<div class="section level2">
+<h2 id="predictions-on-all-test-and-golub">Predictions on ALL Test and Golub<a class="anchor" aria-label="anchor" href="#predictions-on-all-test-and-golub"></a>
+</h2>
+<p>After fitting our classifiers on the <strong>training</strong> subset
+of ALL, we now generate predictions on both the <strong>ALL holdout
+test</strong> and the <strong>Golub B-cell ALL</strong> datasets.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Predict BCR-ABL1 status on ALL test holdout using random forest</span></span>
+<span><span class="va">all_pred</span> <span class="op">&lt;-</span> <span class="fu">MLInterfaces</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/predict.classifierOutput.html" class="external-link">predict.classifierOutput</a></span><span class="op">(</span><span class="va">rf_mod</span>, <span class="va">test_eset</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare to true labels in test_eset</span></span>
+<span><span class="va">conf_mat_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span></span>
+<span>  Truth    <span class="op">=</span> <span class="va">test_eset</span><span class="op">$</span><span class="va">mol.biol</span>,</span>
+<span>  Predicted<span class="op">=</span> <span class="va">all_pred</span><span class="op">$</span><span class="va">testPredictions</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">conf_mat_test</span></span>
+<span><span class="co">#&gt;          Predicted</span></span>
+<span><span class="co">#&gt; Truth     BCR/ABL NEG</span></span>
+<span><span class="co">#&gt;   NEG           3  16</span></span>
+<span><span class="co">#&gt;   BCR/ABL      11   2</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Predict BCR-ABL1 status on Golub B-cell ALL</span></span>
+<span><span class="va">golub_pred</span> <span class="op">&lt;-</span> <span class="fu">MLInterfaces</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MLInterfaces/man/predict.classifierOutput.html" class="external-link">predict.classifierOutput</a></span><span class="op">(</span><span class="va">rf_mod</span>, <span class="va">golub_bALL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summarize prediction counts (no ground truth in Golub)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">golub_pred</span><span class="op">$</span><span class="va">testPredictions</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; BCR/ABL     NEG </span></span>
+<span><span class="co">#&gt;      25      13</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> We retain <strong>true</strong> labels in the
+ALL test set for later IPD; Golub remains
+<strong>unlabeled</strong>.</p>
+</blockquote>
+</div>
+<div class="section level2">
+<h2 id="ipd-inference-on-sex-effect">IPD Inference on Sex Effect<a class="anchor" aria-label="anchor" href="#ipd-inference-on-sex-effect"></a>
+</h2>
+<p>We will now use <strong>Inference with Predicted Data (IPD)</strong>
+to estimate the log-odds effect of <strong>sex</strong> (male vs female)
+on true BCR-ABL1 status, combining the holdout ALL data with true and
+predict fusion status (i.e., our labeled data) and the Golub data with
+the predicted fusion status (i.e., our unlabeled data)</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Build labeled (ALL test) data frame</span></span>
+<span><span class="va">df_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">test_eset</span><span class="op">)</span>,</span>
+<span>  set    <span class="op">=</span> <span class="st">"labeled"</span>,</span>
+<span>  true   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">test_eset</span><span class="op">$</span><span class="va">mol.biol</span> <span class="op">==</span> <span class="st">"BCR/ABL"</span><span class="op">)</span>,</span>
+<span>  pred   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">all_pred</span><span class="op">$</span><span class="va">testPredictions</span> <span class="op">==</span> <span class="st">"BCR/ABL"</span><span class="op">)</span>,</span>
+<span>  sex    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu">pData</span><span class="op">(</span><span class="va">test_eset</span><span class="op">)</span><span class="op">$</span><span class="va">sex</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>,<span class="st">"M"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract logistic coefficients for CD38:</span></span>
-<span><span class="va">ipd_ALL_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span><span class="va">ipd_ALL_res</span>, <span class="op">~</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  Method      <span class="op">=</span> <span class="va">.x</span><span class="op">$</span><span class="va">method_name</span>,</span>
-<span>  Estimate    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"CD38"</span>, <span class="st">"Estimate"</span><span class="op">]</span>,</span>
-<span>  `Std. Error`<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"CD38"</span>, <span class="st">"Std. Error"</span><span class="op">]</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Build unlabeled (Golub) data frame</span></span>
+<span><span class="va">df_golub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">golub_bALL</span><span class="op">)</span>,</span>
+<span>  set    <span class="op">=</span> <span class="st">"unlabeled"</span>,</span>
+<span>  true   <span class="op">=</span> <span class="cn">NA_real_</span>,</span>
+<span>  pred   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">golub_pred</span><span class="op">$</span><span class="va">testPredictions</span> <span class="op">==</span> <span class="st">"BCR/ABL"</span><span class="op">)</span>,</span>
+<span>  sex    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu">pData</span><span class="op">(</span><span class="va">golub_bALL</span><span class="op">)</span><span class="op">$</span><span class="va">Gender</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>,<span class="st">"M"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine naive/classical with IPD:</span></span>
-<span><span class="va">compare_ALL</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>Method <span class="op">=</span> <span class="st">"Naive (predicted)"</span>, Estimate <span class="op">=</span> <span class="va">naive_coef</span><span class="op">[</span><span class="st">"Estimate"</span><span class="op">]</span>,</span>
-<span>         `Std. Error` <span class="op">=</span> <span class="va">naive_coef</span><span class="op">[</span><span class="st">"Std. Error"</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>Method <span class="op">=</span> <span class="st">"Classical (true)"</span>, Estimate <span class="op">=</span> <span class="va">classical_coef</span><span class="op">[</span><span class="st">"Estimate"</span><span class="op">]</span>,</span>
-<span>         `Std. Error` <span class="op">=</span> <span class="va">classical_coef</span><span class="op">[</span><span class="st">"Std. Error"</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>  <span class="va">ipd_ALL_tab</span></span>
-<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    Lower <span class="op">=</span> <span class="va">Estimate</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">`Std. Error`</span>,</span>
-<span>    Upper <span class="op">=</span> <span class="va">Estimate</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">`Std. Error`</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="co"># Combine for IPD</span></span>
+<span><span class="va">ipd_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">df_test</span>, <span class="va">df_golub</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Classical regression</span></span>
+<span><span class="va">class_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">true</span> <span class="op">~</span> <span class="va">sex</span>, <span class="st">"binomial"</span>, <span class="va">df_test</span><span class="op">)</span></span>
+<span><span class="va">class_df</span>  <span class="op">&lt;-</span> <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">class_fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"Classical"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">compare_ALL</span></span></code></pre></div>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">compare_ALL</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Estimate</span>, y <span class="op">=</span> <span class="va">Method</span>, color <span class="op">=</span> <span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">Lower</span>, xmax <span class="op">=</span> <span class="va">Upper</span><span class="op">)</span>, height <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="co"># Naive regression</span></span>
+<span><span class="va">naive_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">pred</span> <span class="op">~</span> <span class="va">sex</span>, <span class="st">"binomial"</span>, <span class="va">df_golub</span><span class="op">)</span></span>
+<span><span class="va">naive_df</span>  <span class="op">&lt;-</span> <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">naive_fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"Naive"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># IPD logistic regression</span></span>
+<span><span class="va">ipd_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd</a></span><span class="op">(</span></span>
+<span>  formula   <span class="op">=</span> <span class="va">true</span> <span class="op">-</span> <span class="va">pred</span> <span class="op">~</span> <span class="va">sex</span>,</span>
+<span>  method    <span class="op">=</span> <span class="st">"pspa"</span>,</span>
+<span>  model     <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  data      <span class="op">=</span> <span class="va">ipd_df</span>,</span>
+<span>  label     <span class="op">=</span> <span class="st">"set"</span>,</span>
+<span><span class="op">)</span></span>
+<span><span class="va">ipd_df</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">ipd_fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"IPD"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Summarize coefficients</span></span>
+<span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">class_df</span>, <span class="va">naive_df</span>, <span class="va">ipd_df</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>term <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/recode.html" class="external-link">recode</a></span><span class="op">(</span><span class="va">term</span>, <span class="st">"sexM"</span> <span class="op">=</span> <span class="st">"Male (vs Female)"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Forest plot</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">combined</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">estimate</span>, y <span class="op">=</span> <span class="va">term</span>, color <span class="op">=</span> <span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_dodge.html" class="external-link">position_dodge</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">estimate</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">std.error</span>,</span>
+<span>                     xmax <span class="op">=</span> <span class="va">estimate</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">std.error</span><span class="op">)</span>,</span>
+<span>                 height <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>                 position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_dodge.html" class="external-link">position_dodge</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_y_discrete</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="va">rev</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1B365D"</span>, <span class="st">"#00C1D5"</span>, <span class="st">"#AA4AC4"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1B365D"</span>, <span class="st">"#00C1D5"</span>, <span class="st">"#AA4AC4"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Logistic effect of CD38 on BCR/ABL status: Naive vs Classical vs IPD"</span>,</span>
-<span>    x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html" class="external-link">hat</a></span><span class="op">(</span><span class="va">beta</span><span class="op">)</span><span class="op">[</span><span class="va">CD38</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">""</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Log-Odds Estimate (95% CI)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Covariate"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Comparison of BCR-ABL1 Model Coefficients"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Model Type"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Unit03_GeneticData_files/figure-html/unnamed-chunk-14-1.png" width="100%"></p>
 <blockquote>
-<p><strong>Interpretation:</strong></p>
-<ul>
-<li>
-<strong>Naive</strong> logistic is biased (since predicted_Y is a
-function of CD19, which correlates with CD38).</li>
-<li>
-<strong>Classical</strong> logistic (only 50% labeled) is unbiased
-but wide.</li>
-<li>
-<strong>IPD</strong> methods recover something close to classical’s
-$_{}$ but tend to have narrower SE because they leverage the additional
-predicted data.</li>
-</ul>
+<p><strong>Insight:</strong> By treating the ALL test set as labeled and
+Golub as unlabeled, IPD combines information across cohorts to correct
+bias and improve precision when estimating the association between
+BCR-ABL1 status and patient sex.</p>
 </blockquote>
 <hr>
-</div>
-</div>
-<div class="section level3">
-<h3 id="diagnostic-plots-exercises">5.5 Diagnostic Plots &amp; Exercises<a class="anchor" aria-label="anchor" href="#diagnostic-plots-exercises"></a>
-</h3>
-<div class="section level4">
-<h4 id="roc-curve-for-prediction-model">5.5.1 ROC Curve for Prediction Model<a class="anchor" aria-label="anchor" href="#roc-curve-for-prediction-model"></a>
-</h4>
-<p>Assess how well <code>CD19</code> alone (with age &amp; sex possibly)
-predicts BCR/ABL. A poor prediction model yields weaker IPD
-performance.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install pROC if necessary: install.packages("pROC")</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://xrobin.github.io/pROC/" class="external-link">pROC</a></span><span class="op">)</span></span>
-<span><span class="va">roc_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">roc</a></span><span class="op">(</span><span class="va">labeled_ALL</span><span class="op">$</span><span class="va">Y</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">glm_pred</span>, newdata <span class="op">=</span> <span class="va">labeled_ALL</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/pROC/man/plot.roc.html" class="external-link">plot.roc</a></span><span class="op">(</span><span class="va">roc_obj</span>, main <span class="op">=</span> <span class="st">"ROC curve: CD19-based logistic predicting BCR/ABL"</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Exercise 4.1:</strong></p>
-<ul>
-<li>
-<p>Improve the prediction model by adding <code>CD38</code> to the
-predictors:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_pred2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">pred_gene</span> <span class="op">+</span> <span class="va">CD38</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span>, data <span class="op">=</span> <span class="va">labeled_ALL</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span></code></pre></div>
-<p>Recompute IPD and compare the effect of <code>CD38</code> when the
-prediction model includes CD38 itself vs when it doesn’t. (Hint: If you
-use CD38 to predict, then in IPD you’re “double-dipping,” and methods
-like PPI++ may behave erratically.)</p>
-</li>
-</ul>
-</blockquote>
-</div>
-<div class="section level4">
-<h4 id="bootstrap-coverage">5.5.2 Bootstrap Coverage<a class="anchor" aria-label="anchor" href="#bootstrap-coverage"></a>
-</h4>
-<p>Use PostPI bootstrap to empirically check coverage of 95% CI for
-$_{}$. (In a small workshop, you might subsample fewer bootstraps.)</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># This code is computationally expensive; run only 100 bootstraps for demonstration:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
-<span><span class="va">ipd_ALL_postpi_boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd</a></span><span class="op">(</span></span>
-<span>  formula   <span class="op">=</span> <span class="va">Y</span> <span class="op">~</span> <span class="va">CD38</span>,</span>
-<span>  data      <span class="op">=</span> <span class="va">ipd_ALL_df</span>,</span>
-<span>  true_col  <span class="op">=</span> <span class="st">"Y"</span>,</span>
-<span>  pred_col  <span class="op">=</span> <span class="st">"predicted_Y"</span>,</span>
-<span>  label_col <span class="op">=</span> <span class="st">"set_label"</span>,</span>
-<span>  family    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span>,</span>
-<span>  method    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"postpi_bootstrap"</span><span class="op">)</span>,</span>
-<span>  nboot     <span class="op">=</span> <span class="fl">100</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Extract bootstrap distribution of CD38 coefficient, then count how often </span></span>
-<span><span class="co"># the true classical coefficient (classical_logit$coeff["CD38"]) falls inside.</span></span>
-<span></span>
-<span><span class="va">boot_dist</span> <span class="op">&lt;-</span> <span class="va">ipd_ALL_postpi_boot</span><span class="op">$</span><span class="va">boot_tbl</span><span class="op">$</span><span class="va">CD38</span>   <span class="co"># hypothetical location</span></span>
-<span><span class="va">true_beta</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">classical_logit</span><span class="op">)</span><span class="op">[</span><span class="st">"CD38"</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">boot_dist</span> <span class="op">-</span> <span class="fl">1.96</span><span class="op">*</span><span class="fu">sd</span><span class="op">(</span><span class="va">boot_dist</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">true_beta</span> <span class="op">&amp;</span> <span class="va">true_beta</span> <span class="op">&lt;=</span> <span class="va">boot_dist</span> <span class="op">+</span> <span class="fl">1.96</span><span class="op">*</span><span class="fu">sd</span><span class="op">(</span><span class="va">boot_dist</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Exercise 4.2:</strong></p>
-<ul>
-<li>Plot the bootstrap distribution (histogram) of $_{}$ from PostPI.
-Superimpose the classical $_{}$ as a vertical line.</li>
-</ul>
-</blockquote>
-<hr>
-</div>
-</div>
-<div class="section level3">
-<h3 id="summary-takeaways">5.6 Summary &amp; Takeaways<a class="anchor" aria-label="anchor" href="#summary-takeaways"></a>
-</h3>
-<ol style="list-style-type: decimal">
-<li>In a <strong>binary IPD</strong> setting (logistic regression),
-predictions (from logistic or other classifier) can be treated as
-“imputed” outcomes.</li>
-<li>Naively regressing on the predicted labels is biased and
-underestimates uncertainty.</li>
-<li>IPD methods (particularly PPI / PPI++) can correct
-logistic-regression coefficients to approximate what you would have
-obtained had you measured the true outcome on everyone.</li>
-<li>
-<strong>Quality of the predictor (AUC, calibration)</strong>
-directly impacts IPD performance: if your classifier is poor, IPD cannot
-magically fix it.</li>
-<li>
-<strong>Caveat (collider bias):</strong> When you use the same
-variable (e.g. CD38) for both prediction and downstream inference, IPD
-methods may misbehave unless you follow proper “sample splitting” or
-cross-fitting strategies.</li>
-</ol>
-</div>
+<p><em>This is the end of the module. We hope this was informative! For
+question/concerns/suggestions, please reach out to <a href="mailto:ssalerno@fredhutch.org" class="email">ssalerno@fredhutch.org</a></em></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

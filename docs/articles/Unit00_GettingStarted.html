@@ -33,12 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/HOWTO_BUILD_WORKSHOP.html">How To Build A Workshop Package</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit00_GettingStarted.html">Unit 00: Getting Started</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit01_RashomanQuartet.html">Unit 01: The Rashoman Quartet</a></li>
+<li><a class="dropdown-item" href="../articles/Unit00_GettingStarted.html">Unit 00: Getting Started</a></li>
+    <li><a class="dropdown-item" href="../articles/Unit01_RashomonQuartet.html">Unit 01: The Rashomon Quartet</a></li>
     <li><a class="dropdown-item" href="../articles/Unit02_BMIvDXA.html">Unit 02: Different Measures of Adiposity</a></li>
-    <li><a class="dropdown-item" href="../articles/Unit03_GeneticData.html">Unit 03: Classifying BCR-ABL Fusion in B-Cell Leukemia</a></li>
-    <li><a class="dropdown-item" href="../articles/workshop_example.html">An Example Workshop</a></li>
+    <li><a class="dropdown-item" href="../articles/Unit03_GeneticData.html">Unit 03: BCR-ABL Fusion in B-Cell Leukemia</a></li>
   </ul>
 </li>
       </ul>
@@ -61,7 +59,7 @@
                         <h4 data-toc-skip class="author">Stephen
 Salerno</h4>
             
-            <h4 data-toc-skip class="date">2025-06-17</h4>
+            <h4 data-toc-skip class="date">June 24, 2025</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/salernos/ipdworkshop/blob/HEAD/vignettes/Unit00_GettingStarted.Rmd" class="external-link"><code>vignettes/Unit00_GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>Unit00_GettingStarted.Rmd</code></div>
@@ -72,12 +70,13 @@ Salerno</h4>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Welcome to this workshop on <strong>Inference with Predicted Data
-(IPD)</strong>! In this module, we will:</p>
+<p>Welcome to this workshop on <em>Inference with Predicted Data
+(IPD)</em>! In this module, we will:</p>
 <ul>
-<li>Introduce the <code>ipd</code> package and its main functions.</li>
-<li>Demonstrate how to generate synthetic data for different
-models.</li>
+<li>Introduce the <a href="https://github.com/ipd-tools/ipd" class="external-link"><code>ipd</code></a> package and
+its main functions.</li>
+<li>Demonstrate how to generate synthetic data for different types of
+outcomes.</li>
 <li>Fit and compare various IPD methods.</li>
 <li>Inspect results using built-in <code>tidy</code>,
 <code>glance</code>, and <code>augment</code> methods.</li>
@@ -88,53 +87,173 @@ practice.</p>
 <div class="section level2">
 <h2 id="background-and-motivation">Background and Motivation<a class="anchor" aria-label="anchor" href="#background-and-motivation"></a>
 </h2>
-<p>When an outcome
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+<p>When an outcome,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>,
 is costly or difficult to measure, it can be tempting to replace missing
-values with predictions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐗</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{Y} = f(\boldsymbol{X})</annotation></semantics></math>
-from a machine learning model (e.g., random forest or neural network)
+values with predictions,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐗</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\boldsymbol{X})</annotation></semantics></math>,
+from a machine learning model (e.g., a random forest or neural network)
 built on easier-to-measure features,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\boldsymbol{X}</annotation></semantics></math>.
 However, using
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>Y</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{Y}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
 as if it were the true outcome in downstream analyses, e.g., in
 estimating a regression coefficient,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>,
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∣</mo><mi>𝐗</mi></mrow><annotation encoding="application/x-tex">Y \mid \boldsymbol{X}</annotation></semantics></math>,
-leads to biased point estimates and underestimated uncertainty.</p>
-<p>Inference with predicted data (IPD) addresses this by collecting a
-small subset of “labeled” data with true
+for the association between
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
-values to calibrate inference in a larger “unlabeled” set. The
-<code>ipd</code> package implements several recent methods for IPD such
-as <strong>Chen &amp; Chen</strong>, <strong>PPI</strong>,
-<strong>PPI++</strong>, <strong>PostPI</strong>, and
-<strong>PSPA</strong> to produce valid, efficient inference, even when a
-large proportion of outcomes are predicted.</p>
-<p>In this first tutorial, we demonstrate:</p>
-<ol style="list-style-type: decimal">
-<li>Generating fully synthetic data with
-<code><a href="https://ipd-tools.github.io/ipd/reference/simdat.html" class="external-link">ipd::simdat()</a></code>.</li>
-<li>Fitting a simple linear prediction model (e.g., linear
-regression).</li>
-<li>Applying <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd::ipd()</a></code> to estimate the slope,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\boldsymbol{X}</annotation></semantics></math>,
+leads to biased point estimates and underestimated uncertainty. Methods
+for <a href="https://academic.oup.com/bioinformatics/article/41/2/btaf055/7997267" class="external-link">Inference
+with Predicted Data (IPD)</a> address this by leveraging a small subset
+of “labeled” data with true
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+values to calibrate inference in a larger “unlabeled” dataset.</p>
+</div>
+<div class="section level2">
+<h2 id="the-ipd-framework">The IPD Framework<a class="anchor" aria-label="anchor" href="#the-ipd-framework"></a>
+</h2>
+<p>Consider data arising from three sets of observations:</p>
+<ul>
+<li>
+<strong>Training Set</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>j</mi></msub><mo>,</mo><msub><mi>Y</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msubsup><mo stretchy="false" form="postfix">}</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>t</mi></msub></msubsup></mrow><annotation encoding="application/x-tex">\{(X_j, Y_j)\}_{j=1}^{n_t}</annotation></semantics></math>,
+used to fit a predictive model,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>⋅</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\cdot)</annotation></semantics></math>.</li>
+<li>
+<strong>Labeled Set</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msubsup><mo stretchy="false" form="postfix">}</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>l</mi></msub></msubsup></mrow><annotation encoding="application/x-tex">\{(X_i, Y_i)\}_{i=1}^{n_l}</annotation></semantics></math>,
+smaller sample with true outcomes measured.</li>
+<li>
+<strong>Unlabeled Set</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><msubsup><mo stretchy="false" form="postfix">}</mo><mrow><mi>i</mi><mo>=</mo><msub><mi>n</mi><mi>l</mi></msub><mo>+</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>l</mi></msub><mo>+</mo><msub><mi>n</mi><mi>u</mi></msub></mrow></msubsup></mrow><annotation encoding="application/x-tex">\{(X_i)\}_{i=n_l +1}^{n_l + n_u}</annotation></semantics></math>,
+only features available.</li>
+</ul>
+<p>After fitting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
+on the training set, we apply it to the labeled and unlabeled sets to
+obtain predictions
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>i</mi></msub><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_i = f(X_i)</annotation></semantics></math>:</p>
+<p><br></p>
+<div class="float">
+<img src="images/ipd_overview.png" style="width:100.0%" alt="Overview of setup for common ‘inference with predicted data’ problems"><div class="figcaption"><em>Overview of setup for common ‘inference with
+predicted data’ problems</em></div>
+</div>
+<p><br></p>
+<p>Especially for ‘good’ predictions, it is tempting to treat
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>i</mi></msub><annotation encoding="application/x-tex">f_i</annotation></semantics></math>
+in the labeled and unlabeled sets as surrogate outcomes and use them to
+estimate quantities such as regression parameters,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>.
+However, as we will see, this leads to <em>invalid inference</em>. By
+combining the predicted
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>i</mi></msub><annotation encoding="application/x-tex">f_i</annotation></semantics></math>
+with the observed
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">Y_i</annotation></semantics></math>
+in the labeled set, we can calibrate our estimates and standard errors
+to achieve <em>valid inference</em>.</p>
+</div>
+<div class="section level2">
+<h2 id="key-formulas">Key Formulas<a class="anchor" aria-label="anchor" href="#key-formulas"></a>
+</h2>
+<p>Consider a simple linear regression model for the association between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>.
+We discuss the following potential estimators, which we will later
+implement using simulated data.</p>
+<div class="section level3">
+<h3 id="naive-estimator">Naive Estimator<a class="anchor" aria-label="anchor" href="#naive-estimator"></a>
+</h3>
+<p>Using only the <em>unlabeled</em> predictions, the
+<strong>naive</strong> OLS estimator solves</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">naive</mtext></msub><mo>=</mo><mo>arg</mo><munder><mo>min</mo><mi>γ</mi></munder><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mi>U</mi></mrow></munder><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>f</mi><mi>i</mi></msub><mo>−</mo><msub><mi>X</mi><mi>i</mi></msub><mi>′</mi><mi>γ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\hat\gamma_{\text{naive}} = \arg\min_\gamma \sum_{i\in U} (f_i - X_i'\gamma)^2.
+</annotation></semantics></math></p>
+<p>We are careful to write the coefficients for this model as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>,
+because they bear no necessary correspondence with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>,
-of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∣</mo><msub><mi>X</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">Y \mid X_1</annotation></semantics></math>
-in the unlabeled set.</li>
-<li>Comparing <strong>naive</strong>, <strong>classical</strong>, and
-<strong>IPD</strong> estimates of
+except under the extremely restrictive scenario when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
+perfectly captures the true regression function.</p>
+</div>
+<div class="section level3">
+<h3 id="classical-estimator">Classical Estimator<a class="anchor" aria-label="anchor" href="#classical-estimator"></a>
+</h3>
+<p>Instead, a valid approach would be to use only the <em>labeled</em>
+data. This <strong>classical</strong> estimator solves</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">classical</mtext></msub><mo>=</mo><mo>arg</mo><munder><mo>min</mo><mi>β</mi></munder><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mi>L</mi></mrow></munder><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>−</mo><msub><mi>X</mi><mi>i</mi></msub><mi>′</mi><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\hat\beta_{\text{classical}} = \arg\min_\beta \sum_{i\in L} (Y_i - X_i'\beta)^2.
+</annotation></semantics></math> While this approach is valid, it has
+limited precision because
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>l</mi></msub><annotation encoding="application/x-tex">n_l</annotation></semantics></math>
+is small in practice and we do not utilize any potential information
+from the (often much larger) <strong>unlabeled</strong> data.</p>
+</div>
+<div class="section level3">
+<h3 id="ipd-estimators">IPD Estimators<a class="anchor" aria-label="anchor" href="#ipd-estimators"></a>
+</h3>
+<p>Many estimators tailored to inference with predicted data share a
+similar form, as given in <a href="https://arxiv.org/pdf/2501.09731" class="external-link">Ji
+et al. (2025)</a>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">ipd</mtext></msub><mo>=</mo><mo>arg</mo><munder><mo>min</mo><mi>β</mi></munder><mfrac><mn>1</mn><msub><mi>n</mi><mi>l</mi></msub></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>l</mi></msub></munderover><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mn>1</mn><msub><mi>n</mi><mi>l</mi></msub></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>l</mi></msub></munderover><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><msub><mi>f</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mfrac><mn>1</mn><mrow><msub><mi>n</mi><mi>l</mi></msub><mo>+</mo><msub><mi>n</mi><mi>u</mi></msub></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><msub><mi>n</mi><mi>l</mi></msub><mo>+</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>l</mi></msub><mo>+</mo><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><msub><mi>f</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\widehat\beta_\text{ipd} = \arg\min_\beta \frac{1}{n_l}\sum_{i=1}^{n_l} \ell(X_i, Y_i) - \left[\frac{1}{n_l}\sum_{i=1}^{n_l} g(X_i, f_i) - \frac{1}{n_l+n_u}\sum_{i=n_l+1}^{n_l+n_u} g(X_i, f_i)\right],
+</annotation></semantics></math></p>
+<p>for some loss function,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>ℓ</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>⋅</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\ell(\cdot)</annotation></semantics></math>,
+such as the squared error loss for linear regression, and some
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>⋅</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g(\cdot)</annotation></semantics></math>,
+which they call the ‘imputed loss’. Here, the first term is exactly the
+<strong>classical</strong> estimator, which anchors these methods on a
+valid model, and the second term in the square brackets ‘augments’ the
+estimator with additional information from the predictions. This allows
+us to have an estimator that is provably unbiased and asymptotically at
+least as efficient as the <strong>classical</strong> estimator, which
+only uses a fraction of the data.</p>
+<p>The <a href="https://academic.oup.com/bioinformatics/article/41/2/btaf055/7997267" class="external-link">Inference
+with Predicted Data (IPD)</a> package implements several recent methods
+for IPD, such as <strong>Chen &amp; Chen</strong> method of <a href="https://arxiv.org/pdf/2411.19908" class="external-link">Gronsbell et al.</a>, the
+Prediction-Powered Inference (<strong>PPI</strong>) and
+<strong>PPI++</strong> methods of <a href="https://www.science.org/doi/10.1126/science.adi6000" class="external-link">Angelopoulos
+et al. (a)</a> and <a href="https://arxiv.org/pdf/2311.01453" class="external-link">Angelopoulos et al. (a)</a>, the
+Post-Prediction Inference (<strong>PostPI</strong>) method of <a href="https://www.pnas.org/doi/10.1073/pnas.2001238117" class="external-link">Wang et al.</a>,
+and the Post-Prediction Adaptive Inference (<strong>PSPA</strong>)
+method of <a href="https://arxiv.org/abs/2311.14220" class="external-link">Miao et al.</a> to
+conduct valid, efficient inference, even when a large proportion of
+outcomes are predicted.</p>
+<p>In this first tutorial, we demonstrate how to:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Generate</strong> fully synthetic data with
+<code><a href="https://ipd-tools.github.io/ipd/reference/simdat.html" class="external-link">ipd::simdat()</a></code>.</li>
+<li>
+<strong>Fit</strong> a simple linear prediction model (e.g., linear
+regression).</li>
+<li>
+<strong>Apply</strong> <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd::ipd()</a></code> to estimate the
+association,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>,
+between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+using <em>labeled</em> and <em>unlabeled</em> data.</li>
+<li>
+<strong>Compare</strong> the <strong>naive</strong>,
+<strong>classical</strong>, and <strong>IPD</strong> estimates of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>.</li>
-<li>Visualizing residuals and checking coverage.</li>
+<li>
+<strong>Visualize</strong> these results.</li>
 </ol>
+</div>
 </div>
 <div class="section level2">
 <h2 id="installation-and-setup">Installation and Setup<a class="anchor" aria-label="anchor" href="#installation-and-setup"></a>
 </h2>
-<p>Ensure you have the <code>ipd</code> package and some additional
-packages installed:</p>
+<p>First, insure you have the <code>ipd</code> package and some
+additional packages installed:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Install these packages if you have not already:</span></span>
 <span><span class="co"># install.packages(c("ipd", "broom", "tidyverse", "patchwork"))</span></span>
@@ -157,10 +276,11 @@ functions.</p>
 <p>Generates synthetic datasets for various inferential models.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ipd-tools.github.io/ipd/reference/simdat.html" class="external-link">simdat</a></span><span class="op">(</span></span>
-<span>  <span class="va">n</span>,       <span class="co"># Numeric vector of length 3: c(n_train, n_labeled, n_unlabeled)</span></span>
-<span>  <span class="va">effect</span>,  <span class="co"># Numeric: true effect size for simulation</span></span>
-<span>  <span class="va">sigma_Y</span>, <span class="co"># Numeric: residual standard deviation</span></span>
-<span>  <span class="va">model</span>    <span class="co"># Character: one of "mean", "quantile", "ols", "logistic", "poisson"</span></span>
+<span>  <span class="va">n</span>,        <span class="co"># Numeric vector of length 3: c(n_train, n_labeled, n_unlabeled)</span></span>
+<span>  <span class="va">effect</span>,   <span class="co"># Numeric: true effect size for simulation</span></span>
+<span>  <span class="va">sigma_Y</span>,  <span class="co"># Numeric: residual standard deviation</span></span>
+<span>  <span class="va">model</span>,    <span class="co"># Character: one of "mean", "quantile", "ols", "logistic", "poisson"</span></span>
+<span>  <span class="va">...</span>       <span class="co"># Additional arguments</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This function returns a data.frame with columns:</p>
 <ul>
@@ -211,9 +331,9 @@ or “unlabeled”.</li>
 <strong>ppi</strong>: prediction-powered inference (<a href="https://www.science.org/doi/10.1126/science.adi6000" class="external-link">Angelopoulos
 et al., 2023</a>)</li>
 <li>
-<strong>ppi_pluspus</strong>: PPI++ (PPI with data-driven weighting;
-<a href="https://arxiv.org/pdf/2311.01453" class="external-link">Angelopoulos et al.,
-2024</a>)</li>
+<strong>ppi_plusplus</strong>: PPI++ (PPI with data-driven
+weighting; <a href="https://arxiv.org/pdf/2311.01453" class="external-link">Angelopoulos et
+al., 2024</a>)</li>
 <li>
 <strong>ppi_a</strong>: PPI using all data (<a href="https://arxiv.org/pdf/2411.19908" class="external-link">Gronsbell et al., 2025</a>)</li>
 <li>
@@ -254,19 +374,22 @@ model),</li>
 <li>An <strong>unlabeled set</strong> (where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 is <em>presumed missing</em> but you compute predictions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>Y</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{Y}</annotation></semantics></math>).</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>).</li>
 </ul>
-<p>We supply <code>n = c(n_train, n_label, n_unlabel)</code>, an effect
-size (<code>effect</code>), residual standard deviation
-(<code>sigma_Y</code>), and a model type (<code>"ols"</code>,
-<code>"logistic"</code>, etc.). In this tutorial, we focus on a linear
-outcome. We can also optionally shift and scale the predictions (via the
-<code>shift</code> and <code>scale</code> arguments) to control how the
-predicted outcomes relate to their true underlying counterparts.</p>
+<p>We supply the sample sizes,
+<code>n = c(n_train, n_label, n_unlabel)</code>, an effect size
+(<code>effect</code>), residual standard deviation
+(<code>sigma_Y</code>; i.e., how much random noise is in the data), and
+a model type (<code>"ols"</code>, <code>"logistic"</code>, etc.). In
+this tutorial, we focus on a continuous outcome generated from a linear
+regression model (<code>"ols"</code>). We can also optionally shift and
+scale the predictions (via the <code>shift</code> and <code>scale</code>
+arguments) to control how the predicted outcomes relate to their true
+underlying counterparts.</p>
 <div class="section level3">
 <h3 id="exercise-1-data-generation">Exercise 1: Data Generation<a class="anchor" aria-label="anchor" href="#exercise-1-data-generation"></a>
 </h3>
-<p>Let us generate a synthetic dataset for an OLS model with:</p>
+<p>Let us generate a synthetic dataset for a linear model with:</p>
 <ul>
 <li>5,000 training observations</li>
 <li>500 labeled observations</li>
@@ -282,11 +405,8 @@ predicted outcomes relate to their true underlying counterparts.</p>
 </blockquote>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="co"># Your code here</span></span>
-<span><span class="co"># dat &lt;- simdat(...)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="co"># n_train = 5000, n_labeled = 500, n_unlabeled = 1500</span></span>
+<span></span>
+<span><span class="co"># n_t = 5000, n_l = 500, n_u = 1500</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5000</span>, <span class="fl">500</span>, <span class="fl">1500</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Effect size = 1.5, noise sd = 3, model = "ols" (ordinary least squares)</span></span>
@@ -299,7 +419,7 @@ predicted outcomes relate to their true underlying counterparts.</p>
 <span>  shift   <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  scale   <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The resulting data.frame `dat` has columns:</span></span>
 <span><span class="co">#  - X1, X2, X3, X4: Four simulated covariates (all numeric ~ N(0,1))</span></span>
 <span><span class="co">#  - Y             : True outcome (available in unlabeled set for simulation)</span></span>
@@ -317,45 +437,48 @@ predicted outcomes relate to their true underlying counterparts.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> training   <span style="text-decoration: underline;">5</span>000</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> unlabeled  <span style="text-decoration: underline;">1</span>500</span></span></code></pre></div>
 <p>Let us inspect the first few rows of each subset:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">[</span><span class="va">dat</span><span class="op">$</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"training"</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            X1         X2         X3         X4         Y  f set_label</span></span>
-<span><span class="co">#&gt; 1 -0.56047565 -1.6180367 -0.9100612 -1.1199920  3.862533 NA  training</span></span>
-<span><span class="co">#&gt; 2 -0.23017749  0.3791812  0.2806627 -1.0158191 -1.657563 NA  training</span></span>
-<span><span class="co">#&gt; 3  1.55870831  1.9022505 -1.0356704  1.2580527  4.187291 NA  training</span></span>
-<span><span class="co">#&gt; 4  0.07050839  0.6018743  0.2730487 -1.0012317 -3.362496 NA  training</span></span>
-<span><span class="co">#&gt; 5  0.12928774  1.7323497  0.5377981 -0.4078238  6.997892 NA  training</span></span>
-<span><span class="co">#&gt; 6  1.71506499 -0.1468696  0.5003932 -0.6251544  1.596773 NA  training</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">[</span><span class="va">dat</span><span class="op">$</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              X1         X2         X3          X4          Y          f</span></span>
-<span><span class="co">#&gt; 5001 -0.4941739 -0.1506300  2.0279109  0.53495620  2.7182292  0.6755630</span></span>
-<span><span class="co">#&gt; 5002  1.1275935  0.8009406 -1.4947497  0.36182362  1.7213369 -0.1370632</span></span>
-<span><span class="co">#&gt; 5003 -1.1469495 -1.1867178 -1.5729492 -1.89096604  0.8608107 -1.7557959</span></span>
-<span><span class="co">#&gt; 5004  1.4810186  0.4306364 -0.3002123 -1.40631763  3.7717312  0.8414616</span></span>
-<span><span class="co">#&gt; 5005  0.9161912  0.2167471 -0.7643735 -0.40192822 -2.7719155  0.1551297</span></span>
-<span><span class="co">#&gt; 5006  0.3351310  0.9612923 -1.1161571  0.07679509  1.2041033 -0.5231051</span></span>
-<span><span class="co">#&gt;      set_label</span></span>
-<span><span class="co">#&gt; 5001   labeled</span></span>
-<span><span class="co">#&gt; 5002   labeled</span></span>
-<span><span class="co">#&gt; 5003   labeled</span></span>
-<span><span class="co">#&gt; 5004   labeled</span></span>
-<span><span class="co">#&gt; 5005   labeled</span></span>
-<span><span class="co">#&gt; 5006   labeled</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span><span class="op">[</span><span class="va">dat</span><span class="op">$</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"unlabeled"</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              X1          X2         X3         X4          Y          f</span></span>
-<span><span class="co">#&gt; 5501 -1.3572306  0.01014789 -1.4252151 -1.1645365 -3.8296223 -1.9014253</span></span>
-<span><span class="co">#&gt; 5502 -1.2926978  1.56213812  1.7329897 -0.2522693 -3.0350282 -0.1679210</span></span>
-<span><span class="co">#&gt; 5503 -1.5172073  0.41284605  1.6608518 -1.3945975 -5.3736718 -0.3030749</span></span>
-<span><span class="co">#&gt; 5504  0.8591760 -1.18886219 -0.8534361  0.3959429  2.6076634  0.1249168</span></span>
-<span><span class="co">#&gt; 5505 -1.2146175  0.71454993  0.2690559  0.5980741 -4.7813463 -0.8998546</span></span>
-<span><span class="co">#&gt; 5506  0.6190554  0.58507617 -0.8609704  1.5944459 -0.5346971 -0.1662322</span></span>
-<span><span class="co">#&gt;      set_label</span></span>
-<span><span class="co">#&gt; 5501 unlabeled</span></span>
-<span><span class="co">#&gt; 5502 unlabeled</span></span>
-<span><span class="co">#&gt; 5503 unlabeled</span></span>
-<span><span class="co">#&gt; 5504 unlabeled</span></span>
-<span><span class="co">#&gt; 5505 unlabeled</span></span>
-<span><span class="co">#&gt; 5506 unlabeled</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Training set</span></span>
+<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"training"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 5,000</span></span>
+<span><span class="co">#&gt; Columns: 7</span></span>
+<span><span class="co">#&gt; $ X1        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.56047565<span style="color: #949494;">, </span>-0.23017749<span style="color: #949494;">, </span>1.55870831<span style="color: #949494;">, </span>0.07050839<span style="color: #949494;">, </span>0.12928774…</span></span>
+<span><span class="co">#&gt; $ X2        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.61803670<span style="color: #949494;">, </span>0.37918115<span style="color: #949494;">, </span>1.90225048<span style="color: #949494;">, </span>0.60187427<span style="color: #949494;">, </span>1.73234970<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ X3        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.91006117<span style="color: #949494;">, </span>0.28066267<span style="color: #949494;">, </span>-1.03567040<span style="color: #949494;">, </span>0.27304874<span style="color: #949494;">, </span>0.53779815…</span></span>
+<span><span class="co">#&gt; $ X4        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.119992047<span style="color: #949494;">, </span>-1.015819127<span style="color: #949494;">, </span>1.258052722<span style="color: #949494;">, </span>-1.001231731<span style="color: #949494;">, </span>-0.40…</span></span>
+<span><span class="co">#&gt; $ Y         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 3.8625325<span style="color: #949494;">, </span>-1.6575634<span style="color: #949494;">, </span>4.1872914<span style="color: #949494;">, </span>-3.3624963<span style="color: #949494;">, </span>6.9978916<span style="color: #949494;">, </span>1.5…</span></span>
+<span><span class="co">#&gt; $ f         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ set_label <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "training"<span style="color: #949494;">, </span>"training"<span style="color: #949494;">, </span>"training"<span style="color: #949494;">, </span>"training"<span style="color: #949494;">, </span>"training"<span style="color: #949494;">, </span>…</span></span>
+<span></span>
+<span><span class="co"># Labeled set</span></span>
+<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 500</span></span>
+<span><span class="co">#&gt; Columns: 7</span></span>
+<span><span class="co">#&gt; $ X1        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.4941739<span style="color: #949494;">, </span>1.1275935<span style="color: #949494;">, </span>-1.1469495<span style="color: #949494;">, </span>1.4810186<span style="color: #949494;">, </span>0.9161912<span style="color: #949494;">, </span>0.3…</span></span>
+<span><span class="co">#&gt; $ X2        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.15062996<span style="color: #949494;">, </span>0.80094056<span style="color: #949494;">, </span>-1.18671785<span style="color: #949494;">, </span>0.43063636<span style="color: #949494;">, </span>0.21674709…</span></span>
+<span><span class="co">#&gt; $ X3        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.0279109<span style="color: #949494;">, </span>-1.4947497<span style="color: #949494;">, </span>-1.5729492<span style="color: #949494;">, </span>-0.3002123<span style="color: #949494;">, </span>-0.7643735<span style="color: #949494;">, </span>-…</span></span>
+<span><span class="co">#&gt; $ X4        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.53495620<span style="color: #949494;">, </span>0.36182362<span style="color: #949494;">, </span>-1.89096604<span style="color: #949494;">, </span>-1.40631763<span style="color: #949494;">, </span>-0.4019282…</span></span>
+<span><span class="co">#&gt; $ Y         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.71822922<span style="color: #949494;">, </span>1.72133689<span style="color: #949494;">, </span>0.86081066<span style="color: #949494;">, </span>3.77173123<span style="color: #949494;">, </span>-2.77191549<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ f         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.67556303<span style="color: #949494;">, </span>-0.13706321<span style="color: #949494;">, </span>-1.75579589<span style="color: #949494;">, </span>0.84146158<span style="color: #949494;">, </span>0.15512973…</span></span>
+<span><span class="co">#&gt; $ set_label <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labe…</span></span>
+<span></span>
+<span><span class="co"># Unlabeled set</span></span>
+<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"unlabeled"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 1,500</span></span>
+<span><span class="co">#&gt; Columns: 7</span></span>
+<span><span class="co">#&gt; $ X1        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.35723063<span style="color: #949494;">, </span>-1.29269781<span style="color: #949494;">, </span>-1.51720731<span style="color: #949494;">, </span>0.85917603<span style="color: #949494;">, </span>-1.214617…</span></span>
+<span><span class="co">#&gt; $ X2        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.01014789<span style="color: #949494;">, </span>1.56213812<span style="color: #949494;">, </span>0.41284605<span style="color: #949494;">, </span>-1.18886219<span style="color: #949494;">, </span>0.71454993<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ X3        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.42521509<span style="color: #949494;">, </span>1.73298966<span style="color: #949494;">, </span>1.66085181<span style="color: #949494;">, </span>-0.85343610<span style="color: #949494;">, </span>0.26905593…</span></span>
+<span><span class="co">#&gt; $ X4        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.1645365<span style="color: #949494;">, </span>-0.2522693<span style="color: #949494;">, </span>-1.3945975<span style="color: #949494;">, </span>0.3959429<span style="color: #949494;">, </span>0.5980741<span style="color: #949494;">, </span>1.…</span></span>
+<span><span class="co">#&gt; $ Y         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.8296223<span style="color: #949494;">, </span>-3.0350282<span style="color: #949494;">, </span>-5.3736718<span style="color: #949494;">, </span>2.6076634<span style="color: #949494;">, </span>-4.7813463<span style="color: #949494;">, </span>-…</span></span>
+<span><span class="co">#&gt; $ f         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.9014253<span style="color: #949494;">, </span>-0.1679210<span style="color: #949494;">, </span>-0.3030749<span style="color: #949494;">, </span>0.1249168<span style="color: #949494;">, </span>-0.8998546<span style="color: #949494;">, </span>-…</span></span>
+<span><span class="co">#&gt; $ set_label <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabel…</span></span></code></pre></div>
 <blockquote>
 <p><strong>Explanation:</strong></p>
 <ul>
@@ -363,28 +486,30 @@ predicted outcomes relate to their true underlying counterparts.</p>
 training set. Here, <code>Y</code> is observed, but <code>f</code> is
 <code>NA</code>, as we learn the prediction rule in this set.</li>
 <li>Rows where <code>set_label == "labeled"</code> also have both
-<code>Y</code> and <code>f</code>. In practice, ‘f’ will be generated by
-your own prediction model; for simulation, <code>simdat</code> does so
-automatically.</li>
+<code>Y</code> and <code>f</code>. In practice, <code>f</code> will be
+generated by your own prediction model; for simulation,
+<code>simdat</code> does so automatically.</li>
 <li>Rows where <code>set_label == "unlabeled"</code> have <code>Y</code>
 for posterity (but in a real‐data scenario, you would not know
-<code>Y</code>); <code>simdat</code> still places a placeholder in
-<code>Y</code>, but IPD routines will not use these. The column
-<code>f</code> always contains ‘predicted’ values.</li>
+<code>Y</code>); <code>simdat</code> still generates <code>Y</code>, but
+the IPD routines will not use these. The column <code>f</code> always
+contains ‘predicted’ values.</li>
 </ul>
 </blockquote>
 </div>
 </div>
 <div class="section level2">
-<h2 id="fit-a-naive-linear-prediction-model">Fit a Naive Linear Prediction Model<a class="anchor" aria-label="anchor" href="#fit-a-naive-linear-prediction-model"></a>
+<h2 id="fit-a-linear-prediction-model">Fit a Linear Prediction Model<a class="anchor" aria-label="anchor" href="#fit-a-linear-prediction-model"></a>
 </h2>
-<p>In a real application, we would take the <strong>training</strong>
-portion and fit an AI/ML model to predict
+<p>In practice, we would take the <strong>training</strong> portion and
+fit an AI/ML model to predict
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
-from <code>(X1, X2, X3, X4)</code>. This is done automatically by the
-<code>simdat</code> function, but for demonstration, we will fit a
-<em>linear regression model</em> on the training data:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><msub><mi>X</mi><mn>3</mn></msub><mo>,</mo><msub><mi>X</mi><mn>4</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X_1, X_2, X_3, X_4)</annotation></semantics></math>.
+This is done automatically by the <code>simdat</code> function, but for
+demonstration, let us fit a <em>linear prediction model</em> on the
+training data:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1) Subset training set</span></span>
 <span><span class="va">dat_train</span> <span class="op">&lt;-</span> <span class="va">dat</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">==</span> <span class="st">"training"</span><span class="op">)</span></span>
@@ -408,14 +533,13 @@ from <code>(X1, X2, X3, X4)</code>. This is done automatically by the
 <span><span class="va">dat</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">set_label</span>, <span class="va">Y</span>, <span class="va">f</span>, <span class="va">f_pred</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">!=</span> <span class="st">"training"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   set_label          Y          f     f_pred</span></span>
-<span><span class="co">#&gt; 1   labeled  2.7182292  0.6755630  0.6755630</span></span>
-<span><span class="co">#&gt; 2   labeled  1.7213369 -0.1370632 -0.1370632</span></span>
-<span><span class="co">#&gt; 3   labeled  0.8608107 -1.7557959 -1.7557959</span></span>
-<span><span class="co">#&gt; 4   labeled  3.7717312  0.8414616  0.8414616</span></span>
-<span><span class="co">#&gt; 5   labeled -2.7719155  0.1551297  0.1551297</span></span>
-<span><span class="co">#&gt; 6   labeled  1.2041033 -0.5231051 -0.5231051</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 2,000</span></span>
+<span><span class="co">#&gt; Columns: 4</span></span>
+<span><span class="co">#&gt; $ set_label <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labeled"<span style="color: #949494;">, </span>"labe…</span></span>
+<span><span class="co">#&gt; $ Y         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.71822922<span style="color: #949494;">, </span>1.72133689<span style="color: #949494;">, </span>0.86081066<span style="color: #949494;">, </span>3.77173123<span style="color: #949494;">, </span>-2.77191549<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ f         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.67556303<span style="color: #949494;">, </span>-0.13706321<span style="color: #949494;">, </span>-1.75579589<span style="color: #949494;">, </span>0.84146158<span style="color: #949494;">, </span>0.15512973…</span></span>
+<span><span class="co">#&gt; $ f_pred    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.67556303<span style="color: #949494;">, </span>-0.13706321<span style="color: #949494;">, </span>-1.75579589<span style="color: #949494;">, </span>0.84146158<span style="color: #949494;">, </span>0.15512973…</span></span></code></pre></div>
 <blockquote>
 <p><strong>Explanation of arguments:</strong></p>
 <ul>
@@ -423,10 +547,9 @@ from <code>(X1, X2, X3, X4)</code>. This is done automatically by the
 <code>lm(Y ~ X1 + X2 + X3 + X4, data = dat_train)</code> fits an
 ordinary least squares (OLS) regression on the training subset.</li>
 <li>
-<code>predict(lm_pred, newdata = .)</code> generates
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>Y</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{Y}</annotation></semantics></math>
-(stored as <code>f_pred</code>) for each row outside of the training
-set.</li>
+<code>predict(lm_pred, newdata = .)</code> generates a new
+<code>f</code> (stored as <code>f_pred</code>) for each row outside of
+the training set.</li>
 </ul>
 </blockquote>
 <blockquote>
@@ -452,7 +575,7 @@ predictions).</li>
 observe them; <code>ipd</code> will still require the <code>f</code> +
 covariates).</li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat_ipd</span> <span class="op">&lt;-</span> <span class="va">dat</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">set_label</span> <span class="op">!=</span> <span class="st">"training"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># Keep only the columns needed for downstream IPD</span></span>
@@ -513,7 +636,7 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
 </li>
 </ol>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prepare data</span></span>
 <span><span class="va">dat_visualize</span> <span class="op">&lt;-</span> <span class="va">dat_ipd</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">X1</span>, <span class="va">Y</span>, <span class="va">f</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -522,30 +645,30 @@ and
 <span></span>
 <span><span class="co"># Scatter + trend lines</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dat_visualize</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">Value</span>, color <span class="op">=</span> <span class="va">Measure</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"steelblue"</span>, <span class="st">"gray"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x     <span class="op">=</span> <span class="st">"X1"</span>,</span>
 <span>    y     <span class="op">=</span> <span class="st">"True Y or Predicted f"</span>,</span>
-<span>    color <span class="op">=</span> <span class="st">"Measure"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Scatterplot of True Outcome vs Prediction\nby Covariate X1"</span></span>
+<span>    color <span class="op">=</span> <span class="st">"Measure"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-9-1.png" width="100%"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Density plots</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dat_visualize</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Value</span>, fill <span class="op">=</span> <span class="va">Measure</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"steelblue"</span>, <span class="st">"gray"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x     <span class="op">=</span> <span class="st">"Value"</span>,</span>
 <span>    y     <span class="op">=</span> <span class="st">"Density"</span>,</span>
-<span>    fill  <span class="op">=</span> <span class="st">"Measure"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Density of True Y vs Predicted f\n(showing reduced variance of predictions)"</span></span>
+<span>    fill  <span class="op">=</span> <span class="st">"Measure"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-10-1.png" width="100%"></p>
 <blockquote>
 <p><strong>Interpretation:</strong></p>
 <p>In the <strong>scatterplot</strong>, note that the predicted values
@@ -567,10 +690,10 @@ to “regression to the mean”).</p>
 </h2>
 <p>Before applying IPD, let’s see what happens if we:</p>
 <ol style="list-style-type: decimal">
-<li>Regress <em>only the ‘unlabeled’</em> predicted <code>f</code> on
-<code>X1</code> (the ‘naive’ approach).</li>
-<li>Regress <em>only the ‘labeled’</em> true <code>Y</code> on
-<code>X1</code> (the ‘classical’ approach).</li>
+<li>Regress the <em>unlabeled</em> predicted <code>f</code> on
+<code>X1</code> (the <strong>naive</strong> approach).</li>
+<li>Regress only the <em>labeled</em> true <code>Y</code> on
+<code>X1</code> (the <strong>classical</strong> approach).</li>
 </ol>
 <p>We will compare these to IPD‐corrected estimates.</p>
 <div class="section level3">
@@ -580,51 +703,44 @@ to “regression to the mean”).</p>
 two models:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Naive OLS</strong> on the unlabeled set using
+<strong>Naive OLS</strong> on the <em>unlabeled</em> set using
 <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> with <code>f ~ X1</code>.</li>
 <li>
-<strong>Classical OLS</strong> on the labeled set using
+<strong>Classical OLS</strong> on the <em>labeled</em> set using
 <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> with <code>Y ~ X1</code>.</li>
 </ol>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Your code here</span></span>
-<span><span class="co"># naive_model &lt;- lm(...)</span></span>
-<span><span class="co"># classical_model &lt;- lm(...)</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1) Naive: treat f as if it were truth (only on unlabeled)</span></span>
 <span><span class="va">naive_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">f</span> <span class="op">~</span> <span class="va">X1</span>, data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dat_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"unlabeled"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2) Classical: regress true Y on X1, only on the labeled set</span></span>
 <span><span class="va">classical_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">X1</span>, data <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">dat_ipd</span>, <span class="va">set_label</span> <span class="op">==</span> <span class="st">"labeled"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Let’s also extract the coefficient summaries and compare the
-results</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Let’s also extract the coefficient summaries using <code>tidy</code>
+and compare the results of the two approaches:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">naive_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">naive_model</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"Naive"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">==</span> <span class="st">"X1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">method</span>, <span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">classical_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">classical_model</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"Classical"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">==</span> <span class="st">"X1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">method</span>, <span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  Method       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Naive"</span>, <span class="st">"Classical"</span><span class="op">)</span>,</span>
-<span>  Estimate     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">naive_df</span><span class="op">$</span><span class="va">estimate</span>,  <span class="va">classical_df</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
-<span>  `Std. Error` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">naive_df</span><span class="op">$</span><span class="va">std.error</span>, <span class="va">classical_df</span><span class="op">$</span><span class="va">std.error</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">naive_df</span>, <span class="va">classical_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
-<span><span class="co">#&gt;   Method    Estimate `Std. Error`</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Naive        0.730       0.014<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Classical    1.48        0.155</span></span></code></pre></div>
+<span><span class="co">#&gt;   method    estimate std.error</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Naive        0.730    0.014<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Classical    1.48     0.155</span></span></code></pre></div>
 <blockquote>
 <p><strong>Expected behavior (interpretation):</strong></p>
 <ul>
-<li>The <strong>naive</strong> coefficient will typically be
-<em>attenuated</em> or <em>biased</em> toward zero if prediction is
-imperfect.</li>
-<li>The <strong>classical</strong> coefficient (only 500 labeled pts) is
-unbiased but has large standard error due to smaller sample size.</li>
+<li>The <strong>naive</strong> coefficient is <em>attenuated</em>, or
+<em>biased</em> toward zero, since the predictions are imperfect.</li>
+<li>The <strong>classical</strong> coefficient is unbiased but has a
+larger standard error due to the smaller sample size.</li>
 </ul>
 </blockquote>
 </div>
@@ -638,28 +754,27 @@ IPD methods (e.g., <strong>Chen &amp; Chen</strong>,
 <strong>PSPA</strong>) for various inferential tasks (e.g.,
 <strong>mean</strong> and <strong>quantile</strong> estimation,
 <strong>ols</strong>, <strong>logistic</strong>, and
-<strong>poisson</strong> regression under the hood.</p>
+<strong>poisson</strong> regression).</p>
 <blockquote>
-<p><strong>Basic usage of <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd()</a></code>:</strong></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r fold-show"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">ipd</span>(</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>  <span class="at">formula =</span> Y <span class="sc">-</span> f <span class="sc">~</span> X1,     <span class="co"># The downstream inferential model</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="at">method  =</span> <span class="st">"chen"</span>          <span class="co"># The IPD method to run </span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="at">model   =</span> <span class="st">"ols"</span>           <span class="co"># The type of inferential model</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="at">data    =</span> dat_ipd,        <span class="co"># A data.frame with columns:</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                            <span class="co">#   - set_label: {"labeled", "unlabeled"}</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                            <span class="co">#   - Y: true outcomes (for labeled data)</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                            <span class="co">#   - f: predicted outcomes</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>                            <span class="co">#   - X covariates (here X1, X2, X3, X4)</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>  <span class="at">label   =</span> <span class="st">"set_label"</span>,    <span class="co"># Column name indicating "labeled"/"unlabeled"</span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>)</span></code></pre></div>
+<p><strong>Reminder:</strong> Basic usage of <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd()</a></code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">ipd</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">formula =</span> Y <span class="sc">-</span> f <span class="sc">~</span> X1,     <span class="co"># The downstream inferential model</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">method  =</span> <span class="st">"pspa"</span>          <span class="co"># The IPD method to run </span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">model   =</span> <span class="st">"ols"</span>           <span class="co"># The type of inferential model</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">data    =</span> dat_ipd,        <span class="co"># A data.frame with columns:</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>                            <span class="co">#   - set_label: {"labeled", "unlabeled"}</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                            <span class="co">#   - Y: true outcomes (for labeled data)</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                            <span class="co">#   - f: predicted outcomes</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>                            <span class="co">#   - X covariates (here X1, X2, X3, X4)</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="at">label   =</span> <span class="st">"set_label"</span>,    <span class="co"># Column name indicating "labeled"/"unlabeled"</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>)</span></code></pre></div>
 </blockquote>
 <div class="section level3">
-<h3 id="exercise-3-ipd-model-fitting-via-the-chen-chen-estimator">Exercise 3: IPD Model Fitting via the Chen &amp; Chen Estimator<a class="anchor" aria-label="anchor" href="#exercise-3-ipd-model-fitting-via-the-chen-chen-estimator"></a>
+<h3 id="exercise-3-ipd-model-fitting-via-the-pspa-estimator">Exercise 3: IPD Model Fitting via the PSPA Estimator<a class="anchor" aria-label="anchor" href="#exercise-3-ipd-model-fitting-via-the-pspa-estimator"></a>
 </h3>
-<p>Let us run one method, <code>chen</code> (the ‘Chen &amp; Chen’
-estimator proposed by <a href="https://arxiv.org/pdf/2411.19908" class="external-link">Gronsbell et al., 2025</a>). The
-Chen &amp; Chen estimator is an IPD method that combines information
-from:</p>
+<p>Let’s run one method, <code>pspa</code>, proposed by <a href="https://arxiv.org/pdf/2311.14220" class="external-link">Miao et al., 2024</a>. The
+<strong>PSPA</strong> estimator is an IPD method that combines
+information from:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Labeled data</strong> (where the true outcome,
@@ -673,94 +788,89 @@ are available), and<br>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>,
 are available).</li>
 </ol>
-<p>Rather than treating every unlabeled observation equally, it applies
-a <strong>data-driven weight</strong>, <span class="math inline">$\hat{W}^{\rm CC}$</span>, to the unlabeled
-contribution and obtains</p>
+<p>Rather than treating the predicted outcomes with importance as the
+true outcomes, the method estimates a <strong>data-driven
+weight</strong>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>ω</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\omega}</annotation></semantics></math>,
+and applies it to the predicted outcome contributions:</p>
 <p><span class="math display">$$
-\hat{\beta}^{\rm CC} = \hat{\beta}^{\rm lab} - \hat{W}^{\rm
-CC}(\hat{\gamma}^{\rm lab} - \hat{\gamma}^{\rm all})
+\hat{\beta}_{\rm pspa} = \hat{\beta}_{\rm classical} - \hat{\omega}\cdot
+(\hat{\gamma}_{\rm naive}^l - \hat{\gamma}_{\rm naive}^u),
 $$</span></p>
-<p>where <span class="math inline">$\hat{\beta}^{\rm lab}$</span> is the
-slope estimate from the classical regression, <span class="math inline">$\hat{\gamma}^{\rm lab}$</span> is the slope
-estimate from the naive regression in the labeled data, <span class="math inline">$\hat{\gamma}^{\rm all}$</span> is the slope
-estimate from the naive regression in the labeled + unlabeled data, and
-<span class="math inline">$\hat{W}^{\rm CC}$</span> reflects amound of
-additional information carried by the predictions. By adaptively
-weighting the unlabeled information, the Chen &amp; Chen estimator
-achieves greater precision than using labeled data alone, without
-sacrificing validity, even when the predictions are imperfect.</p>
+<p>where <span class="math inline">$\hat{\beta}_{\rm classical}$</span>
+is the estimate from the <strong>classical</strong> regression, <span class="math inline">$\hat{\gamma}_{\rm naive}^l$</span> is the estimate
+from the <strong>naive</strong> regression in the <em>labeled</em> data,
+<span class="math inline">$\hat{\gamma}_{\rm naive}^u$</span> is the
+estimate from the <strong>naive</strong> regression in the
+<em>unlabeled</em> data, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>ω</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\omega}</annotation></semantics></math>
+reflects the amount of additional information carried by the
+predictions. By adaptively weighting the unlabeled information, the
+<strong>PSPA</strong> estimator achieves greater precision than by using
+the labeled data alone, without sacrificing validity, even when the
+predictions are imperfect.</p>
 <p>Let’s call the method using the <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd()</a></code> function and
 collect the estimate for the slope of <code>X1</code> in a linear
 regression (<code>model = "ols"</code>):</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="co"># Your code here</span></span>
-<span><span class="co"># ipd_model &lt;- ipd(...)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">ipd_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd</a></span><span class="op">(</span></span>
 <span>  formula <span class="op">=</span> <span class="va">Y</span> <span class="op">-</span> <span class="va">f</span> <span class="op">~</span> <span class="va">X1</span>,</span>
 <span>  data    <span class="op">=</span> <span class="va">dat_ipd</span>,</span>
 <span>  label   <span class="op">=</span> <span class="st">"set_label"</span>,</span>
-<span>  method  <span class="op">=</span> <span class="st">"chen"</span>,</span>
+<span>  method  <span class="op">=</span> <span class="st">"pspa"</span>,</span>
 <span>  model   <span class="op">=</span> <span class="st">"ols"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ipd_model</span></span>
 <span><span class="co">#&gt; IPD inference summary</span></span>
-<span><span class="co">#&gt;   Method:   chen </span></span>
+<span><span class="co">#&gt;   Method:   pspa </span></span>
 <span><span class="co">#&gt;   Model:    ols </span></span>
 <span><span class="co">#&gt;   Formula:  Y - f ~ X1 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;             Estimate Std. Error z value  Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)  0.84515    0.14389  5.8737 4.262e-09 ***</span></span>
-<span><span class="co">#&gt; X1           1.36895    0.14280  9.5866 &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; (Intercept)  0.88014    0.14702  5.9865 2.143e-09 ***</span></span>
+<span><span class="co">#&gt; X1           1.43248    0.14628  9.7929 &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
-<p>The <code>ipd_model</code> is an S4 object with slots for things like
-the coefficient, se, ci, coefTable, fit, formula, data_l, data_u,
-method, model, and intercept. We can extract the coefficient table using
-<code>ipd</code>’s <code>tidy</code> helper and compare with the naive
-and classical methods:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p>The <code>ipd_model</code> is an <code>S4</code> object with slots
+for things like the coefficient, se, ci, coefTable, fit, formula,
+data_l, data_u, method, model, and intercept. We can extract the
+coefficient table using <code>ipd</code>’s <code>tidy</code> helper and
+compare with the naive and classical methods:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract the coefficient estimates</span></span>
 <span><span class="va">ipd_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">ipd_model</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"IPD"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">==</span> <span class="st">"X1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">method</span>, <span class="va">estimate</span>, <span class="va">std.error</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Combine with naive &amp; classical:</span></span>
-<span><span class="va">compare_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  Method       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Naive"</span>, <span class="st">"Classical"</span>, <span class="st">"IPD"</span><span class="op">)</span>,</span>
-<span>  Estimate     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">naive_df</span><span class="op">$</span><span class="va">estimate</span>,  <span class="va">classical_df</span><span class="op">$</span><span class="va">estimate</span>,  <span class="va">ipd_df</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
-<span>  `Std. Error` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">naive_df</span><span class="op">$</span><span class="va">std.error</span>, <span class="va">classical_df</span><span class="op">$</span><span class="va">std.error</span>, <span class="va">ipd_df</span><span class="op">$</span><span class="va">std.error</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
+<span><span class="va">compare_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">naive_df</span>, <span class="va">classical_df</span>, <span class="va">ipd_df</span><span class="op">)</span></span>
 <span><span class="va">compare_tab</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
-<span><span class="co">#&gt;   Method    Estimate `Std. Error`</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Naive        0.730       0.014<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Classical    1.48        0.155 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> IPD          1.37        0.143</span></span></code></pre></div>
+<span><span class="co">#&gt;   method    estimate std.error</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Naive        0.730    0.014<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Classical    1.48     0.155 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> IPD          1.43     0.146</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="exercise-4-visualizing-uncertainty">Exercise 4: Visualizing Uncertainty<a class="anchor" aria-label="anchor" href="#exercise-4-visualizing-uncertainty"></a>
 </h3>
-<p>Plot the coefficient estimates and 95% CIs for methods: naive,
-classical, and IPD.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Your code: collect tidy outputs and plot</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p>Let’s plot the coefficient estimates and 95% CIs for each of the
+naive, classical, and IPD methods:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Forest plot of estimates and 95% confidence intervals</span></span>
 <span><span class="va">compare_tab</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    Lower <span class="op">=</span> <span class="va">Estimate</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">`Std. Error`</span>,</span>
-<span>    Upper <span class="op">=</span> <span class="va">Estimate</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">`Std. Error`</span></span>
+<span>    lower <span class="op">=</span> <span class="va">estimate</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">std.error</span>,</span>
+<span>    upper <span class="op">=</span> <span class="va">estimate</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">std.error</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Estimate</span>, y <span class="op">=</span> <span class="va">Method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">estimate</span>, y <span class="op">=</span> <span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">Lower</span>, xmax <span class="op">=</span> <span class="va">Upper</span><span class="op">)</span>, height <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">lower</span>, xmax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>, height <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">1.5</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Comparison of slope estimates \u00B1 1.96·SE"</span>,</span>
@@ -768,7 +878,7 @@ classical, and IPD.</p>
 <span>      y <span class="op">=</span> <span class="st">""</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-20-1.png" width="576"></p>
+<p><img src="Unit00_GettingStarted_files/figure-html/unnamed-chunk-16-1.png" width="576"></p>
 <blockquote>
 <p><strong>Interpretation:</strong></p>
 <ul>
@@ -790,35 +900,30 @@ than ‘naive,’ often similar to classical but sometimes narrower.</li>
 <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> on <code>ipd_model</code>. Compare the
 coefficient estimate and standard error for <code>X1</code> with the
 naive fit.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Your code here</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">ipd_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
 <span><span class="co">#&gt;   term        estimate std.error conf.low conf.high</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> (Intercept)    0.845     0.144    0.563      1.13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> X1             1.37      0.143    1.09       1.65</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> (Intercept)    0.880     0.147    0.592      1.17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> X1             1.43      0.146    1.15       1.72</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">ipd_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
 <span><span class="co">#&gt;   method model intercept nobs_labeled nobs_unlabeled call      </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> chen   ols   TRUE               500           <span style="text-decoration: underline;">1</span>500 Y - f ~ X1</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">ipd_model</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     set_label          Y          f         X1          X2         X3</span></span>
-<span><span class="co">#&gt; 501 unlabeled -3.8296223 -1.9014253 -1.3572306  0.01014789 -1.4252151</span></span>
-<span><span class="co">#&gt; 502 unlabeled -3.0350282 -0.1679210 -1.2926978  1.56213812  1.7329897</span></span>
-<span><span class="co">#&gt; 503 unlabeled -5.3736718 -0.3030749 -1.5172073  0.41284605  1.6608518</span></span>
-<span><span class="co">#&gt; 504 unlabeled  2.6076634  0.1249168  0.8591760 -1.18886219 -0.8534361</span></span>
-<span><span class="co">#&gt; 505 unlabeled -4.7813463 -0.8998546 -1.2146175  0.71454993  0.2690559</span></span>
-<span><span class="co">#&gt; 506 unlabeled -0.5346971 -0.1662322  0.6190554  0.58507617 -0.8609704</span></span>
-<span><span class="co">#&gt;             X4    .fitted    .resid</span></span>
-<span><span class="co">#&gt; 501 -1.1645365 -1.0128301 -2.816792</span></span>
-<span><span class="co">#&gt; 502 -0.2522693 -0.9244879 -2.110540</span></span>
-<span><span class="co">#&gt; 503 -1.3945975 -1.2318300 -4.141842</span></span>
-<span><span class="co">#&gt; 504  0.3959429  2.0213184  0.586345</span></span>
-<span><span class="co">#&gt; 505  0.5980741 -0.8175999 -3.963746</span></span>
-<span><span class="co">#&gt; 506  1.5944459  1.6926054 -2.227302</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> pspa   ols   TRUE               500           <span style="text-decoration: underline;">1</span>500 Y - f ~ X1</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">ipd_model</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 1,500</span></span>
+<span><span class="co">#&gt; Columns: 9</span></span>
+<span><span class="co">#&gt; $ set_label <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabeled"<span style="color: #949494;">, </span>"unlabel…</span></span>
+<span><span class="co">#&gt; $ Y         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.8296223<span style="color: #949494;">, </span>-3.0350282<span style="color: #949494;">, </span>-5.3736718<span style="color: #949494;">, </span>2.6076634<span style="color: #949494;">, </span>-4.7813463<span style="color: #949494;">, </span>-…</span></span>
+<span><span class="co">#&gt; $ f         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.9014253<span style="color: #949494;">, </span>-0.1679210<span style="color: #949494;">, </span>-0.3030749<span style="color: #949494;">, </span>0.1249168<span style="color: #949494;">, </span>-0.8998546<span style="color: #949494;">, </span>-…</span></span>
+<span><span class="co">#&gt; $ X1        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.35723063<span style="color: #949494;">, </span>-1.29269781<span style="color: #949494;">, </span>-1.51720731<span style="color: #949494;">, </span>0.85917603<span style="color: #949494;">, </span>-1.214617…</span></span>
+<span><span class="co">#&gt; $ X2        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.01014789<span style="color: #949494;">, </span>1.56213812<span style="color: #949494;">, </span>0.41284605<span style="color: #949494;">, </span>-1.18886219<span style="color: #949494;">, </span>0.71454993<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ X3        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.42521509<span style="color: #949494;">, </span>1.73298966<span style="color: #949494;">, </span>1.66085181<span style="color: #949494;">, </span>-0.85343610<span style="color: #949494;">, </span>0.26905593…</span></span>
+<span><span class="co">#&gt; $ X4        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.1645365<span style="color: #949494;">, </span>-0.2522693<span style="color: #949494;">, </span>-1.3945975<span style="color: #949494;">, </span>0.3959429<span style="color: #949494;">, </span>0.5980741<span style="color: #949494;">, </span>1.…</span></span>
+<span><span class="co">#&gt; $ .fitted   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.0640638<span style="color: #949494;">, </span>-0.9716221<span style="color: #949494;">, </span>-1.2932266<span style="color: #949494;">, </span>2.1108854<span style="color: #949494;">, </span>-0.8597740<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ .resid    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -2.7655584<span style="color: #949494;">, </span>-2.0634061<span style="color: #949494;">, </span>-4.0804452<span style="color: #949494;">, </span>0.4967781<span style="color: #949494;">, </span>-3.9215723<span style="color: #949494;">, </span>-…</span></span>
 <span></span>
 <span><span class="co"># Compare with naive</span></span>
 <span><span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">naive_model</span><span class="op">)</span></span>
@@ -852,15 +957,22 @@ coefficients.</li>
 <h2 id="further-exploration">Further Exploration<a class="anchor" aria-label="anchor" href="#further-exploration"></a>
 </h2>
 <ul>
-<li>Try the <strong>PPI++</strong> (<code>"ppi_plusplus"</code>) and
-<strong>PSPA</strong> methods (<code>"pspa"</code>). How are they
-similar? How do they differ?</li>
+<li>Try other methods such as <strong>PPI++</strong>
+(<code>"ppi_plusplus"</code>). How do the results compare?</li>
 <li>Repeat the analysis for a <strong>logistic</strong> model by setting
 <code>model = "logistic"</code> in both <code><a href="https://ipd-tools.github.io/ipd/reference/simdat.html" class="external-link">simdat()</a></code> and
 <code><a href="https://ipd-tools.github.io/ipd/reference/ipd.html" class="external-link">ipd()</a></code>.</li>
 </ul>
 <p>Happy coding! Feel free to modify and extend these exercises for your
 own data.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Salerno, Stephen, et al. “ipd: An R Package for Conducting Inference
+on Predicted Data.” <em>Bioinformatics</em> (2025): btaf055.</li>
+</ul>
 <hr>
 <p><em>This is the end of the module. We hope this was informative! For
 question/concerns/suggestions, please reach out to <a href="mailto:ssalerno@fredhutch.org" class="email">ssalerno@fredhutch.org</a></em></p>

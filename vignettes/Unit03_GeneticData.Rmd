@@ -1,7 +1,7 @@
 ---
 title: "Unit 03: BCR-ABL Fusion in B-Cell Leukemia"
 author: "Stephen Salerno"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
+date: "June 24, 2025"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -180,7 +180,7 @@ probe_golub <- gmap_golub |>
 dat_train  <- dat_filt[probe_all$PROBEID, ]
 eset_golub <- Golub_Merge[probe_golub$PROBEID, ]
 
-# urther subset Golub to B-cell ALL samples
+# Further subset Golub to B-cell ALL samples
 golub_bALL <- eset_golub[, pData(eset_golub)$T.B.cell == "B-cell" &
                            pData(eset_golub)$ALL.AML  == "ALL"]
 
@@ -232,7 +232,7 @@ biplot(PCg)
 >
 > * The heatmap reveals distinct blocks of probes whose expression differs between BCR-ABL1 fusion-positive and fusion-negative samples.
 > * The PCA scatter shows separation (or overlap) of samples by fusion status along the first two principal components, and to a lesser extent, the next three.
-> * In the biplot, probes lying far from the origin along PC1 or PC2 represent genes with the larges loadings, i.e., the greatest contribution to those principal components. Samples positioned similarly share expression patters in those genes.
+> * In the biplot, probes lying far from the origin along PC1 or PC2 represent genes with the largest loadings, i.e., the greatest contribution to those principal components. Samples positioned similarly share expression patterns in those genes.
 > * Overall, the modest separation in PCA indicates the need for supervised methods to pinpoint the genes most predictive of BCR-ABL1 status.
 
 ## Train/Test Split and Classifier Training

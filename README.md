@@ -1,6 +1,6 @@
 # Inference with Predicted Data (IPD) Workshop
 
-## <img src="inst/images/ipd.png" align="right" height="200" style="float:right; height:200px;"/>
+## <img src="ipd.png" align="right" height="200" style="float:right; height:200px;"/>
 
 > What do we do after we have machine learned everything?
 
@@ -20,7 +20,7 @@
     Anna Neufeld^[[acn2@williams.edu](mailto:acn2@williams.edu)],
     Stephen Salerno^[[ssalerno@fredhutch.org](mailto:ssalerno@fredhutch.org)]
 
-**Last modified:** June 18, 2025
+**Workshop Date:** June 24, 2025
 
 ---
 
@@ -59,28 +59,34 @@ and diagnostics.
 This workshop covers four modules (time permitting), each illustrating IPD in R 
 using the [`ipd`](https://github.com/ipd-tools/ipd) package:
 
-1. **Unit 00: Getting Started**
+1. [**Unit 00: Getting Started**](https://salernos.github.io/ipdworkshop/articles/Unit00_GettingStarted.html)
 
    * **Introduce** IPD concepts and core [`ipd`](https://github.com/ipd-tools/ipd) package functions
    * **Simulate** data and explore the bias and variance of AI/ML predictions versus 'real' data
    * **Fit** naive and classical inference models and compare with IPD methods
+   
+<br/>
 
-2. **Unit 01: The Rashomon Quartet**
+2. [**Unit 01: The Rashomon Quartet**](https://salernos.github.io/ipdworkshop/articles/Unit01_RashomonQuartet.html)
 
    * **Train** multiple prediction models on the [Rashomon Quartet](https://github.com/MI2DataLab/rashomon-quartet) training set
    * **Compare** the performances of the upstream predictions on the [Rashomon Quartet](https://github.com/MI2DataLab/rashomon-quartet) testing set
    * **Recover** classical estimates using IPD and contrast with naive estimates
+   
+<br/>
 
-3. **Unit 02: Different Measures of Adiposity**
+3. [**Unit 02: Different Measures of Adiposity**](https://salernos.github.io/ipdworkshop/articles/Unit02_BMIvDXA.html)
 
    * **Explore** the [National Health and Nutrition Examination Survey (NHANES)](https://www.cdc.gov/nchs/nhanes/index.html) pre- and post- COVID-19
    * **Define** obesity based body mass index, waist circumference, and gold-standard dual-energy X-ray absorptiometry
    * **Demonstrate** how conclusions differ for naive, classical, and IPD logistic regression
+   
+<br/>
 
-4. **Unit 03: BCR-ABL Fusion in B-Cell Leukemia**
+4. [**Unit 03: BCR-ABL Fusion in B-Cell Leukemia**](https://salernos.github.io/ipdworkshop/articles/Unit03_GeneticData.html)
 
    * **Learn** gene expression classifiers for [acute lymphoblastic leukemia (ALL)](https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html) genetic subtypes
-   * **Harmonize** features across [different](https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html) [arrays](https://www.bioconductor.org/packages/release/data/experiment/html/golubEsets.html) and predict BCR-ABL1 (Philadelphia chromosome) fusion status
+   * **Harmonize** features across two studies ([`ALL`](https://www.bioconductor.org/packages/release/data/experiment/html/ALL.html) and [`Golub`](https://www.bioconductor.org/packages/release/data/experiment/html/golubEsets.html)) and predict BCR-ABL1 (Philadelphia chromosome) fusion status
    * **Perform** IPD to estimate associations between fusion status and clinical risk factors
 
 ### Participation
@@ -107,18 +113,18 @@ This 90-minute workshop uses a blended format of **instruction** and
 
 * *Predictive Modeling:* `neuralnet`, `partykit`, `randomForest`, `ranger`, `mgcv`, `pROC`, `DALEX`, `MLInterfaces`
 
-* *Inference with Predicted Data:*, `ipd`
+* *Inference with Predicted Data:* `ipd`
     
 ### Time Outline (90 minutes)
 
-| Activity                                   | Time |
-| ------------------------------------------ | ---- |
-| Brief Overview of the Problem              | 15 m |
-| Unit 00: Getting Started                   | 15 m |
-| Unit 01: The Rashoman Quartet              | 15 m |
-| Unit 02: Different Measures of Adiposity   | 15 m |
-| Unit 03: BCR-ABL Fusion in B-Cell Leukemia | 15 m |
-| Wrap-Up and Q&A                            | 15 m |
+| Activity                                                                                                              | Time |
+| ----------------------------------------------------------------------------------------------------------------------| ---- |
+| Brief Overview of the Problem                                                                                         | 15 m |
+| [Unit 00: Getting Started](https://salernos.github.io/ipdworkshop/articles/Unit00_GettingStarted.html)                | 15 m |
+| [Unit 01: The Rashomon Quartet](https://salernos.github.io/ipdworkshop/articles/Unit01_RashomonQuartet.html)          | 15 m |
+| [Unit 02: Different Measures of Adiposity](https://salernos.github.io/ipdworkshop/articles/Unit02_BMIvDXA.html)       | 15 m |
+| [Unit 03: BCR-ABL Fusion in B-Cell Leukemia](https://salernos.github.io/ipdworkshop/articles/Unit03_GeneticData.html) | 15 m |
+| Wrap-Up and Q&A                                                                                                       | 15 m |
 
 ### Workshop Goals and Objectives
 
