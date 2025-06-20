@@ -588,7 +588,6 @@ We now apply **IPD** to leverage all participants (labeled + unlabeled) while ad
 >
 > We can either provide a single, *combined* dataset to the `data` argument and the name of the column that gives the set labels in `label`:
 >
->```r
 > ipd_bmi_1 <- ipd(
 >   formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
 >   data    = combined,
@@ -596,11 +595,9 @@ We now apply **IPD** to leverage all participants (labeled + unlabeled) while ad
 >   model   = "logistic",
 >   method  = "pspa"
 > )
-> ```
 >
 > **or** we can provide the *labeled* set to `data` and the *unlabeled* set to `unlabeled_data` separately:
 >
-> ```r
 > ipd_bmi_2 <- ipd(
 >   formula        = obese_DXA - obese_BMI ~ Age + Sex + Race,
 >   data           = labeled,
@@ -608,13 +605,13 @@ We now apply **IPD** to leverage all participants (labeled + unlabeled) while ad
 >   model          = "logistic",
 >   method         = "pspa"
 > )
-> ```
 
 Now we can try to run the IPD model:
 
 ```{r, eval=FALSE}
 # Note: This code chunk results in an error, but we have an informative warning
 # We can try running it and see!
+
 ipd_bmi_fit <- ipd(
     formula = obese_DXA - obese_BMI ~ Age + Sex + Race,
     method  = "pspa",
