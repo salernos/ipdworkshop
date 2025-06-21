@@ -148,8 +148,8 @@ predicted data’ problems</em></div>
 <p><br></p>
 <p>Especially for ‘good’ predictions, it is tempting to treat
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>i</mi></msub><annotation encoding="application/x-tex">f_i</annotation></semantics></math>
-in the labeled and unlabeled sets as surrogate outcomes and use them to
-estimate quantities such as regression parameters,
+as surrogate outcomes and use them to estimate quantities such as
+regression parameters,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>.
 However, as we will see, this leads to <em>invalid inference</em>. By
 combining the predicted
@@ -798,10 +798,9 @@ true outcomes, the method estimates a <strong>data-driven
 weight</strong>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>ω</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\omega}</annotation></semantics></math>,
 and applies it to the predicted outcome contributions:</p>
-<p><span class="math display">$$
-\hat{\beta}_{\rm pspa} = \hat{\beta}_{\rm classical} - \hat{\omega}\cdot
-(\hat{\gamma}_{\rm naive}^l - \hat{\gamma}_{\rm naive}^u),
-$$</span></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">pspa</mtext></msub><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">classical</mtext></msub><mo>−</mo><mover><mi>ω</mi><mo accent="true">̂</mo></mover><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><msubsup><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">naive</mtext><mi>l</mi></msubsup><mo>−</mo><msubsup><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">naive</mtext><mi>u</mi></msubsup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\hat{\beta}_\text{pspa} = \hat{\beta}_\text{classical} - \hat{\omega}\cdot (\hat{\gamma}_\text{naive}^l - \hat{\gamma}_\text{naive}^u),
+</annotation></semantics></math></p>
 <p>where <span class="math inline">$\hat{\beta}_{\rm classical}$</span>
 is the estimate from the <strong>classical</strong> regression, <span class="math inline">$\hat{\gamma}_{\rm naive}^l$</span> is the estimate
 from the <strong>naive</strong> regression in the <em>labeled</em> data,
