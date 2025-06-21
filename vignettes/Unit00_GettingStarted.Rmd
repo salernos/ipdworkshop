@@ -63,12 +63,11 @@ After fitting $f$ on the training set, we apply it to the labeled and unlabeled 
 
 <br/>
 
-Especially for 'good' predictions, it is tempting to treat $f_i$ in the labeled 
-and unlabeled sets as surrogate outcomes and use them to estimate quantities 
-such as regression parameters, $\beta$.  However, as we will see, this leads 
-to *invalid inference*. By combining the predicted $f_i$ with the observed 
-$Y_i$ in the labeled set, we can calibrate our estimates and standard errors 
-to achieve *valid inference*.
+Especially for 'good' predictions, it is tempting to treat $f_i$ as surrogate 
+outcomes and use them to estimate quantities such as regression parameters, 
+$\beta$.  However, as we will see, this leads to *invalid inference*. By 
+combining the predicted $f_i$ with the observed $Y_i$ in the labeled set, 
+we can calibrate our estimates and standard errors to achieve *valid inference*.
 
 ## Key Formulas
 
@@ -504,7 +503,7 @@ outcomes, the method estimates a **data-driven weight**, $\hat{\omega}$,
 and applies it to the predicted outcome contributions:
 
 $$
-\hat{\beta}_{\rm pspa} = \hat{\beta}_{\rm classical} - \hat{\omega}\cdot (\hat{\gamma}_{\rm naive}^l - \hat{\gamma}_{\rm naive}^u),
+\hat{\beta}_\text{pspa} = \hat{\beta}_\text{classical} - \hat{\omega}\cdot (\hat{\gamma}_\text{naive}^l - \hat{\gamma}_\text{naive}^u),
 $$
 
 where $\hat{\beta}_{\rm classical}$ is the estimate from the **classical** 

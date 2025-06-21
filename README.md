@@ -26,13 +26,13 @@
 
 Artificial intelligence and machine learning (AI/ML) have become essential 
 tools in biomedical research, enabling large-scale analyses across diverse 
-domains such as genomics, structural biology, and electronic health records-
-based research. Increasingly, researchers rely on model-generated predictions, 
-rather than directly measured variables, as inputs for downstream statistical 
-analyses. For example, predicted gene expression values or polygenic risk 
-scores are often used in place of experimental assays, allowing researchers 
-to expand cohort sizes and explore hypotheses when traditional data collection 
-is infeasible, costly, or time-consuming.
+domains such as genomics, structural biology, and electronic health 
+records-based research. Increasingly, researchers rely on model-generated 
+predictions, rather than directly measured variables, as inputs for downstream 
+statistical analyses. For example, predicted gene expression values or 
+polygenic risk scores are often used in place of experimental assays, allowing 
+researchers to expand cohort sizes and explore hypotheses when traditional data 
+collection is infeasible, costly, or time-consuming.
 
 While this practice of "using predictions as data" holds promise for 
 accelerating scientific discovery, it presents significant challenges for 
