@@ -72,7 +72,7 @@ interpretations diverge:
 * **Random forest** produces a smooth ensemble derivative of the tree.
 * **Neural network** learns a different nonlinear basis with hidden units.
 
-![*Source: https://github.com/MI2DataLab/rashomon-quartet*](images/Rashomon_overview.png){width=100%}
+![*Source: https://github.com/MI2DataLab/rashomon-quartet*](images/rashomon_overview.png){width=100%}
 
 In addition to comparing interpretability across models, we will demonstrate 
 how to perform valid downstream inference for $Y$ on $\boldsymbol{X}$ when $Y$ 
