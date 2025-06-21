@@ -109,6 +109,24 @@ metabolic outcomes. Comparing BMI-based obesity (BMI ≥ 30 kg/m²) and
 WC-based obesity (WC ≥ 102 cm men, ≥ 88 cm women) with DXA-defined
 obesity reveals where and how often these common anthropometric proxies
 misclassify true adiposity.</p>
+<p>It is worth noting that BMI is often defended as a valid measure for
+population-level inference, under the assumption that individual-level
+misclassification errors are harmless when estimating group-level
+trends. This justification appears frequently in epidemiology, where BMI
+is treated as a convenient stand-in for adiposity in regression models.
+But this reasoning masks a deeper issue central to the IPD framework:
+BMI is itself a prediction model, a crude one, but a model nonetheless.
+It encodes a deterministic function (weight divided by height squared)
+to approximate an unobserved latent quantity (body fat), and like any
+prediction model, it introduces systematic biases that may not vanish
+with aggregation. IPD adopts a prediction-agnostic perspective: whether
+the surrogate is a simple index like BMI or a high-dimensional neural
+network, the challenge is the same: how to draw valid statistical
+inference when the outcome is a model-based proxy. By treating BMI as a
+prediction rather than a ground truth, we clarify the role of
+uncertainty, calibration, and correction, and demonstrate how IPD
+methods can help recover valid estimates even when only such surrogates
+are available.</p>
 <p>In this module, we will use data from the <a href="https://www.cdc.gov/nchs/nhanes/index.html" class="external-link">National Health and
 Nutrition Examination Survey (NHANES)</a> to:</p>
 <ol style="list-style-type: decimal">
